@@ -1,0 +1,52 @@
+# =========================
+# Build stage (NestJS)
+# =========================
+FROM node:20-alpine AS builder
+
+WORKDIR /app/nestjs
+
+# Copy only package files first (better cache)
+COPY nestjs/package*.json ./
+
+# Install ALL deps (including devDeps) because build needs them
+RUN npm ci && npm cache clean --force
+
+# Copy the rest of the backend source
+COPY nestjs/ ./
+
+# Build NestJS -> outputs to dist/
+RUN npm run build
+
+
+# =========================
+# Production stage
+# =========================
+FROM node:20-alpine AS production
+
+WORKDIR /app/nestjs
+ENV NODE_ENV=production
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
+
+# (Optional) If you want curl-based checks in other places
+# RUN apk add --no-cache curl
+
+# Install production deps only
+COPY nestjs/package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Copy built output
+COPY --from=builder --chown=nestjs:nodejs /app/nestjs/dist ./dist
+
+# Switch to non-root user
+USER nestjs
+
+# Health check (checks HTTP 200/3xx response)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:' + (process.env.API_PORT || 3000), (r) => { if (r.statusCode < 200 || r.statusCode >= 400) process.exit(1); }).on('error', () => process.exit(1));"
+
+EXPOSE 3000
+
+# Nest default entry is dist/main.js
+CMD ["node", "dist/main.js"]

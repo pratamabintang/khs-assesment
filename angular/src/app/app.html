@@ -1,0 +1,7 @@
+@if (error().length) {
+<app-error-modal title="Terjadi error!" [message]="error()" />
+} @if (details()) {
+<app-details-modal title="Detail opsi!" [data]="details()" />
+}
+
+<router-outlet />

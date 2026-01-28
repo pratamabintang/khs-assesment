@@ -1,0 +1,228 @@
+<app-form title="Daftar Akun" desc="Lengkapi data untuk membuat akun">
+  <div class="mt-6">
+    <!-- Step Indicator -->
+    <div class="flex items-center justify-center gap-6">
+      <!-- Step 1 -->
+      <div class="flex items-center gap-2">
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors"
+          [ngClass]="
+            step() >= 1 ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-400'
+          "
+        >
+          1
+        </div>
+
+        <span
+          class="text-sm font-medium transition-colors"
+          [ngClass]="step() >= 1 ? 'text-blue-600' : 'text-gray-400'"
+        >
+          Perusahaan
+        </span>
+      </div>
+
+      <!-- Line -->
+      <div
+        class="w-10 h-1 transition-colors"
+        [ngClass]="step() >= 2 ? 'bg-blue-600' : 'bg-gray-300'"
+      ></div>
+
+      <!-- Step 2 -->
+      <div class="flex items-center gap-2">
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors"
+          [ngClass]="
+            step() >= 2 ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-400'
+          "
+        >
+          2
+        </div>
+
+        <span
+          class="text-sm font-medium transition-colors"
+          [ngClass]="step() >= 2 ? 'text-blue-600' : 'text-gray-400'"
+        >
+          Akun
+        </span>
+      </div>
+    </div>
+
+    <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div [class.hidden]="step() !== 1">
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Nama Perusahaan</label>
+          <input
+            maxlength="64"
+            type="text"
+            placeholder="Contoh: PT. Karya Husada Sejahtera"
+            formControlName="companyName"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                isInvalid(companyName),
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !isInvalid(companyName),
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (isInvalid(companyName)) {
+            <p class="mt-1 text-xs text-orange-600">Nama perusahaan wajib diisi.</p>
+          }
+          @if (isLengthInvalid(companyName)) {
+            <p class="mt-1 text-xs text-orange-600">Nama perusahaan maksimal 64 karakter.</p>
+          }
+        </div>
+
+        <app-region-selector
+          [provinceCtrl]="form.controls.provinceId"
+          [regencyCtrl]="form.controls.regencyId"
+          [districtCtrl]="form.controls.districtId"
+          [villageCtrl]="form.controls.villageId"
+        ></app-region-selector>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Lengkap</label>
+          <input
+            maxlength="64"
+            type="text"
+            placeholder="Jalan, nomor, RT/RW, detail lainnya"
+            formControlName="addressDetail"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                isInvalid(addressDetail),
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !isInvalid(addressDetail),
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (isInvalid(addressDetail)) {
+            <p class="mt-1 text-xs text-orange-600">Alamat lengkap wajib diisi.</p>
+          }
+          @if (isLengthInvalid(addressDetail)) {
+            <p class="mt-1 text-xs text-orange-600">Alamat maksimal 64 karakter.</p>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="mb-5 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:brightness-110 active:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed"
+          [disabled]="!step1Valid()"
+          (click)="next()"
+        >
+          Lanjut
+        </button>
+
+        <p class="text-center text-sm text-slate-500">
+          Sudah punya akun?
+          <a [routerLink]="['/auth', 'login']" class="font-medium text-indigo-600 hover:underline"
+            >Masuk</a
+          >
+        </p>
+      </div>
+
+      <!-- STEP 2 (tidak di-destroy, cuma hide) -->
+      <div [class.hidden]="step() !== 2">
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+          <input
+            maxlength="254"
+            type="email"
+            placeholder="nama@gmail.com"
+            formControlName="email"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                isInvalid(email),
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !isInvalid(email),
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (isInvalid(email)) {
+            <p class="mt-1 text-xs text-orange-600">{{ emailError }}</p>
+          }
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">No. HP</label>
+          <input
+            maxlength="16"
+            type="tel"
+            placeholder="+6281234567890"
+            formControlName="phone"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                isInvalid(phone),
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !isInvalid(phone),
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (isInvalid(phone)) {
+            <p class="mt-1 text-xs text-orange-600">{{ phoneError }}</p>
+          }
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <input
+            maxlength="32"
+            type="password"
+            placeholder="Minimal 8 karakter (kuat)"
+            formControlName="password"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                isInvalid(password),
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !isInvalid(password),
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (isInvalid(password)) {
+            <p class="mt-1 text-xs text-orange-600">
+              {{ passwordError }}
+            </p>
+          }
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Password</label>
+          <input
+            maxlength="32"
+            type="password"
+            placeholder="Ulangi password"
+            formControlName="confirmPassword"
+            [ngClass]="{
+              'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':
+                confirmPasswordError,
+              'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20':
+                !confirmPasswordError,
+            }"
+            class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2"
+          />
+          @if (confirmPasswordError) {
+            <p class="mt-1 text-xs text-orange-600">
+              {{ confirmPasswordError }}
+            </p>
+          }
+        </div>
+
+        <div class="mb-5 flex gap-3">
+          <button
+            type="button"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+            (click)="back()"
+          >
+            Kembali
+          </button>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:brightness-110 active:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="!step2Valid()"
+          >
+            Daftar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</app-form>

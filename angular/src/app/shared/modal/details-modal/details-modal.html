@@ -1,0 +1,105 @@
+<app-modal (requestClose)="onClearDetails()">
+  <div
+    class="relative w-full max-w-[720px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-black/20"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="safeTitle()"
+  >
+    <div class="relative p-5">
+      <button
+        type="button"
+        class="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+        aria-label="Tutup"
+        (click)="onClearDetails()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M6 6l12 12" />
+          <path d="M18 6L6 18" />
+        </svg>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600"
+          aria-hidden="true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 10v5" />
+            <path d="M12 7h.01" />
+          </svg>
+        </div>
+
+        <h2 class="text-xl font-semibold text-slate-900">
+          {{ safeTitle() }}
+        </h2>
+      </div>
+
+      <div class="mt-4 max-h-72 overflow-auto rounded-xl border border-slate-200">
+        @if (isEmpty()) {
+        <div class="p-4 text-sm text-slate-600">Silakan coba lagi.</div>
+        } @else {
+        <table class="w-full table-auto">
+          <thead class="sticky top-0 bg-slate-50">
+            <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              <th class="px-4 py-3">Title</th>
+              <th class="px-4 py-3">Explanation</th>
+              <th class="px-4 py-3">Point</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-100 bg-white">
+            @for (row of safeDetails(); track row.id) {
+            <tr class="align-top">
+              <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                {{ row.title }}
+              </td>
+
+              <td class="px-4 py-3 text-sm text-slate-600 whitespace-pre-line">
+                {{ row.explanation }}
+              </td>
+
+              <td class="px-4 py-3 text-sm text-slate-700">
+                {{ row.point }}
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        }
+      </div>
+    </div>
+
+    <div class="h-px bg-slate-100"></div>
+
+    <div class="flex flex-col-reverse gap-2 p-5 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:brightness-110 active:brightness-95"
+        (click)="onClearDetails()"
+        autofocus
+      >
+        Mengerti
+      </button>
+    </div>
+  </div>
+</app-modal>

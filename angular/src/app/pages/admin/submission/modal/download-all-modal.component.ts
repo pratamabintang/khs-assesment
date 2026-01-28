@@ -1,0 +1,181 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+
+export type DownloadAllPayload = {
+  from: string;
+  to: string;
+  idClient?: string;
+  idEmployee?: string;
+};
+
+@Component({
+  selector: 'app-download-all-modal',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    @if (open) {
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-6"
+        (click)="onBackdrop($event)"
+      >
+        <div
+          class="w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
+          (click)="$event.stopPropagation()"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="p-6 sm:p-7">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <div class="text-xs font-semibold text-slate-500">Unduh data</div>
+                <h2 class="mt-1 text-xl font-bold tracking-tight text-slate-900">
+                  Unduh Semua Penilaian
+                </h2>
+                <p class="mt-2 text-sm text-slate-600">
+                  Rentang data:
+                  <span class="font-semibold text-slate-800">{{ fromLabel }}</span>
+                  <span class="mx-1">→</span>
+                  <span class="font-semibold text-slate-800">{{ toLabel }}</span>
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                (click)="close.emit()"
+                aria-label="Close"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div class="mt-6 space-y-4">
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-semibold text-slate-700">Filter (opsional)</div>
+                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="text-[11px] font-semibold text-slate-600">ID Client</label>
+                    <input
+                      class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm
+                             focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      placeholder="contoh: 12"
+                      [value]="idClient()"
+                      (input)="idClient.set(($any($event.target).value ?? '').toString())"
+                    />
+                    <div class="mt-1 text-[11px] text-slate-500">Kosongkan untuk semua client.</div>
+                  </div>
+
+                  <div>
+                    <label class="text-[11px] font-semibold text-slate-600">ID Employee</label>
+                    <input
+                      class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm
+                             focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      placeholder="contoh: 99"
+                      [value]="idEmployee()"
+                      (input)="idEmployee.set(($any($event.target).value ?? '').toString())"
+                    />
+                    <div class="mt-1 text-[11px] text-slate-500">
+                      Kosongkan untuk semua employee.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+                <div class="flex gap-3">
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-indigo-700 ring-1 ring-indigo-100"
+                  >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M12 3v10m0 0l4-4m-4 4l-4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-slate-900">Output</div>
+                    <div class="mt-1 text-sm text-slate-600">
+                      File akan diunduh sesuai rentang dan filter yang kamu isi.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700
+                       hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                (click)="close.emit()"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow
+                       hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                (click)="submit()"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 3v10m0 0l4-4m-4 4l-4-4M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Unduh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  `,
+})
+export class DownloadAllModalComponent {
+  @Input() open = false;
+
+  @Input({ required: true }) from!: string;
+  @Input({ required: true }) to!: string;
+
+  @Input() fromLabel = '';
+  @Input() toLabel = '';
+
+  @Output() close = new EventEmitter<void>();
+  @Output() confirm = new EventEmitter<DownloadAllPayload>();
+
+  idClient = signal('');
+  idEmployee = signal('');
+
+  onBackdrop(ev: MouseEvent) {
+    this.close.emit();
+  }
+
+  submit(): void {
+    const idClient = this.idClient().trim();
+    const idEmployee = this.idEmployee().trim();
+
+    this.confirm.emit({
+      from: this.from,
+      to: this.to,
+      idClient: idClient.length ? idClient : undefined,
+      idEmployee: idEmployee.length ? idEmployee : undefined,
+    });
+  }
+}
