@@ -179,7 +179,7 @@ services:
     volumes:
       - ./nginx/prod.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./dist:/usr/share/nginx/html:ro
+      - ./angular/dist/karyaHusada:/usr/share/nginx/html:ro
     depends_on:
       - backend
     networks:
