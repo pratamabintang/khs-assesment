@@ -10,17 +10,17 @@
   - [ ] `MAIL_PASSWORD` - app-specific password, not account password
   - [ ] `CORS_ORIGIN` - exact domain(s) only -->
 
-- [ ] SSL Certificates configured
+<!-- - [ ] SSL Certificates configured
   - [ ] Certificate file: `nginx/ssl/cert.pem`
   - [ ] Private key file: `nginx/ssl/key.pem`
   - [ ] Certificates are valid and not self-signed (for production)
-  - [ ] Certificate renewal strategy in place (Let's Encrypt auto-renewal)
+  - [ ] Certificate renewal strategy in place (Let's Encrypt auto-renewal) -->
 
-- [ ] Nginx configuration updated
+<!-- - [ ] Nginx configuration updated
   - [ ] `yourdomain.com` replaced with actual domain
   - [ ] SSL paths correct
   - [ ] Rate limiting enabled for login endpoints
-  - [ ] Security headers configured
+  - [ ] Security headers configured -->
 
 ## 📦 Application Setup
 
