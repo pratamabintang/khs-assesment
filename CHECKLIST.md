@@ -2,12 +2,13 @@
 
 ## 🔐 Security & Configuration
 
+<!--
 - [ ] Update `.env.production` with strong passwords
   - [ ] `DB_PASSWORD` - min 32 characters, mixed case, numbers, symbols
   - [ ] `MONGO_INITDB_ROOT_PASSWORD` - min 32 characters
   - [ ] `JWT_SECRET` - generated with `openssl rand -base64 32`
   - [ ] `MAIL_PASSWORD` - app-specific password, not account password
-  - [ ] `CORS_ORIGIN` - exact domain(s) only
+  - [ ] `CORS_ORIGIN` - exact domain(s) only -->
 
 - [ ] SSL Certificates configured
   - [ ] Certificate file: `nginx/ssl/cert.pem`
@@ -226,6 +227,6 @@ docker-compose -f docker-compose.prod.yaml exec postgres psql -U admin -d KHS -c
 
 **Status**: ⬜ Not Started | 🟡 In Progress | ✅ Completed
 
-Date Started: ******\_\_\_******
-Date Completed: ******\_\_\_******
-Deployed By: ******\_\_\_******
+Date Started: **\*\***\_\_\_**\*\***
+Date Completed: **\*\***\_\_\_**\*\***
+Deployed By: **\*\***\_\_\_**\*\***
