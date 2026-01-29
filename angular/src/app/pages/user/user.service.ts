@@ -12,7 +12,7 @@ export class UserService {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private http = inject(HttpClient);
-  private baseUrl = 'https://localhost:3000/auth';
+  private baseUrl = 'https://karyahusadasejahtera.web.id/api/auth';
 
   me() {
     return this.http.get<UserExposeDto>(`${this.baseUrl}/profile`);

@@ -43,9 +43,6 @@ services:
     networks:
       - khs-network
 
-  # =========================
-  # One-off migrations service
-  # =========================
   migrate:
     build:
       context: ./
@@ -53,20 +50,16 @@ services:
       target: tools
     container_name: khs-migrate
     environment:
-      NODE_ENV: production
-      API_PORT: 3000
+      NODE_ENV: ${NODE_ENV}
+      API_PORT: ${API_PORT}
 
-      # Pastikan PORT INTERNAL docker: postgres 5432, mongo 27017
       DB_TYPE: ${DB_TYPE}
-      DB_HOST: postgres
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
 
-      # PENTING: MONGO_URI harus mengarah ke service "mongo" port 27017
-      # Kalau .env kamu masih pakai 27018/localhost, akan gagal.
-      # (lihat catatan di bawah)
       MONGO_URI: ${MONGO_URI}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -95,7 +88,6 @@ services:
     networks:
       - khs-network
     restart: "no"
-    # Jalankan migrasi SQL + Mongo lalu exit
     command: >
       sh -c "
       echo 'Running SQL migrations...' &&
@@ -112,12 +104,12 @@ services:
       target: production
     container_name: khs-backend-prod
     environment:
-      NODE_ENV: production
-      API_PORT: 3000
+      NODE_ENV: ${NODE_ENV}
+      API_PORT: ${API_PORT}
 
       DB_TYPE: ${DB_TYPE}
-      DB_HOST: postgres
-      DB_PORT: 5432
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
@@ -148,15 +140,14 @@ services:
       mongo:
         condition: service_healthy
       # optional: jalankan backend setelah migrate selesai (kalau kamu mau strict)
-      # migrate:
-      #   condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
     ports:
       - "3000:3000"
     restart: unless-stopped
     networks:
       - khs-network
     healthcheck:
-      # no curl; check with node
       test:
         [
           "CMD",

@@ -16,7 +16,7 @@ export class EmployeesService {
   readonly selectedEntry = signal<SurveySubmissionEntry | null>(null);
   readonly selectedIsUpdate = signal<boolean>(false);
 
-  private readonly baseUrl = 'https://localhost:3000';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   setFromEntry(entry: SurveySubmissionEntry, isUpdate: boolean) {
     this.selectedEntry.set(entry ?? null);

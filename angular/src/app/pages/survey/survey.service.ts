@@ -70,7 +70,7 @@ export class SurveyApiService {
   private http = inject(HttpClient);
   private errorService = inject(ErrorService);
 
-  private readonly baseUrl = 'https://localhost:3000';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   submitSurvey(body: SurveySubmitPayload): Observable<void> {
     this.errorService.clearError();

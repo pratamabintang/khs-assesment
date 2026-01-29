@@ -53,7 +53,7 @@ export class AuthService {
   private authStateService = inject(AuthStateService);
   private router = inject(Router);
 
-  private readonly baseUrl = 'https://localhost:3000';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   private readonly ROLE_HOME: Partial<Record<RoleEnum, string>> = {
     [RoleEnum.ADMIN]: '/admin',

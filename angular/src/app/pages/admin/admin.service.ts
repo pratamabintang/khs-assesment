@@ -18,7 +18,7 @@ export class AdminService {
   private readonly errorService = inject(ErrorService);
   readonly selectedEntry = signal<SurveySubmissionEntry | null>(null);
 
-  private readonly baseUrl = 'https://localhost:3000';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   setFromEntry(entry: SurveySubmissionEntry) {
     this.selectedEntry.set(entry ?? null);

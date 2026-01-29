@@ -11,7 +11,7 @@ type bulkDownloadDto = {
 export class DownloadService {
   private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
-  private readonly baseUrl = 'https://localhost:3000/pdf';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api/pdf';
 
   downloadPdf(id: string): Observable<Blob> {
     this.errorService.clearError();
