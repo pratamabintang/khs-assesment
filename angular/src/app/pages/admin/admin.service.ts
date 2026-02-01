@@ -16,7 +16,7 @@ export class AdminService {
   private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
 
-  private readonly baseUrl = 'https://localhost:3000/api';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   readonly selectedEntry = signal<Entry | null>(null);
 

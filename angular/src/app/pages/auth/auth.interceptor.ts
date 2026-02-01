@@ -13,7 +13,7 @@ import { AuthStateService } from './auth-state.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  private apiBase = 'https://localhost:3000/api';
+  private apiBase = 'https://karyahusadasejahtera.web.id/api';
   private refreshing = false;
   private refreshedToken$ = new BehaviorSubject<string | null>(null);
 

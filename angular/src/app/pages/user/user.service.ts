@@ -12,7 +12,7 @@ import { catchError, throwError } from 'rxjs';
 export class UserService {
   private readonly authService = inject(AuthService);
   private http = inject(HttpClient);
-  private baseUrl = 'https://localhost:3000/api/auth';
+  private baseUrl = 'https://karyahusadasejahtera.web.id/api/auth';
   private errorService = inject(ErrorService);
 
   profile() {

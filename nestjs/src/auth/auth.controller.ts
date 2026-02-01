@@ -93,7 +93,7 @@ export class AuthController {
   @Throttle({
     default: {
       ttl: 60000,
-      limit: 6000,
+      limit: 60,
     },
   })
   @Post('refresh')
@@ -132,7 +132,7 @@ export class AuthController {
   @Throttle({
     default: {
       ttl: 60000,
-      limit: 6000,
+      limit: 60,
     },
   })
   getCsrf(@Req() req: Request): { csrfToken?: string } {

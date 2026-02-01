@@ -17,7 +17,7 @@ export class EntryService {
   readonly selectedIsUpdate = signal<boolean>(false);
   readonly selectedPeriod = signal<string>('');
 
-  private readonly baseUrl = 'https://localhost:3000/api';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   setFromEntry(entry: Entry, isUpdate: boolean, period: string) {
     this.selectedEntry.set(entry ?? null);

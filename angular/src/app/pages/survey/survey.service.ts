@@ -41,7 +41,7 @@ export class SurveyApiService {
   private http = inject(HttpClient);
   private errorService = inject(ErrorService);
 
-  private readonly baseUrl = 'https://localhost:3000/api';
+  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
 
   submitSurvey(body: DataDto): Observable<void> {
     this.errorService.clearError();

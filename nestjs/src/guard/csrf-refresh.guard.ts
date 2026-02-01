@@ -19,8 +19,7 @@ export class RefreshCsrfGuard implements CanActivate {
     if (!csrfCookie || !csrfHeader) {
       throw new ForbiddenException('Missing CSRF token');
     }
-    console.log(csrfCookie);
-    console.log(csrfHeader);
+
     if (csrfCookie !== csrfHeader) {
       throw new ForbiddenException('Invalid CSRF token');
     }
