@@ -2,84 +2,56 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
 import { ErrorService } from '../../shared/error.service';
-import { SurveySubmitPayload } from './survey-answer.type';
+import { DataDto } from './dto/data.dto';
 import { SurveyType } from '../../shared/type/survey/survey-type.type';
 import { Survey } from '../../shared/type/survey/survey.type';
 import { AssignSurveyPayload } from './modal/assign-modal.component';
+import { SurveyResponse } from './response/survey.response';
+import { CreateSurveyDto, CreateSurveyQuestionDto } from './dto/create-survey.dto';
 
-export interface CreateSurveyQuestionDetailDto {
-  title: string;
-  explanation: string;
-  shortQuestion: string;
-  point: string;
-}
+// export interface UpdateSurveyQuestionDetailDto {
+//   id?: string;
+//   title?: string;
+//   explanation?: string;
+//   shortQuestion?: string;
+//   point?: string;
+// }
 
-export interface CreateSurveyQuestionDto {
-  type: SurveyType;
-  title: string;
-  description?: string;
-  required?: boolean;
-  min?: number;
-  max?: number;
-  details?: CreateSurveyQuestionDetailDto[];
-}
+// export interface UpdateSurveyQuestionDto {
+//   id?: string;
+//   type?: SurveyType;
+//   title?: string;
+//   description?: string;
+//   required?: boolean;
+//   min?: number;
+//   max?: number;
+//   details?: UpdateSurveyQuestionDetailDto[];
+//   removeDetailIds?: string[];
+// }
 
-export interface CreateSurveyDto {
-  title: string;
-  description: string;
-  questions?: CreateSurveyQuestionDto[];
-}
-
-export interface UpdateSurveyQuestionDetailDto {
-  id?: string;
-  title?: string;
-  explanation?: string;
-  shortQuestion?: string;
-  point?: string;
-}
-
-export interface UpdateSurveyQuestionDto {
-  id?: string;
-  type?: SurveyType;
-  title?: string;
-  description?: string;
-  required?: boolean;
-  min?: number;
-  max?: number;
-  details?: UpdateSurveyQuestionDetailDto[];
-  removeDetailIds?: string[];
-}
-
-export interface UpdateSurveyDto {
-  title?: string;
-  description?: string;
-  question?: UpdateSurveyQuestionDto[];
-  removeQuestionIds?: string[];
-}
-
-export interface SurveyListItem {
-  id: string;
-  title: string;
-  description?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+// export interface UpdateSurveyDto {
+//   title?: string;
+//   description?: string;
+//   question?: UpdateSurveyQuestionDto[];
+//   removeQuestionIds?: string[];
+// }
 
 @Injectable({ providedIn: 'root' })
 export class SurveyApiService {
   private http = inject(HttpClient);
   private errorService = inject(ErrorService);
 
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = 'https://localhost:3000/api';
 
-  submitSurvey(body: SurveySubmitPayload): Observable<void> {
+  submitSurvey(body: DataDto): Observable<void> {
     this.errorService.clearError();
+
     return this.http
       .post<void>(`${this.baseUrl}/submission`, body)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  updateSurvey(submissionId: string, body: SurveySubmitPayload): Observable<void> {
+  updateSurvey(submissionId: string, body: DataDto): Observable<void> {
     this.errorService.clearError();
 
     return this.http
@@ -87,41 +59,46 @@ export class SurveyApiService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  listSurveys(): Observable<SurveyListItem[]> {
+  listSurveys(): Observable<SurveyResponse[]> {
     this.errorService.clearError();
+
     return this.http
-      .get<SurveyListItem[]>(`${this.baseUrl}/survey`)
+      .get<SurveyResponse[]>(`${this.baseUrl}/survey`)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  getSurvey(id: string): Observable<Survey> {
+  getSurvey(id: string): Observable<SurveyResponse> {
     this.errorService.clearError();
+
     return this.http
-      .get<Survey>(`${this.baseUrl}/survey/${id}`)
+      .get<SurveyResponse>(`${this.baseUrl}/survey/${id}`)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  createSurvey(body: Survey): Observable<Survey> {
+  createSurvey(body: Survey): Observable<SurveyResponse> {
     this.errorService.clearError();
+
     const payload: CreateSurveyDto = this.toCreateDto(body);
     return this.http
-      .post<Survey>(`${this.baseUrl}/survey`, payload)
+      .post<SurveyResponse>(`${this.baseUrl}/survey`, payload)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  patchSurveyFull(original: Survey, current: Survey): Observable<Survey> {
-    this.errorService.clearError();
-    if (!original?.id) throw new Error('original.id is required');
-    if (!current?.id) throw new Error('current.id is required');
+  // patchSurveyFull(original: Survey, current: Survey): Observable<Survey> {
+  //   this.errorService.clearError();
 
-    const payload: UpdateSurveyDto = this.toUpdateDtoFull(original, current);
-    return this.http
-      .patch<Survey>(`${this.baseUrl}/survey/${current.id}`, payload)
-      .pipe(catchError((err) => this.handleError(err)));
-  }
+  //   if (!original?.id) throw new Error('original.id is required');
+  //   if (!current?.id) throw new Error('current.id is required');
+
+  //   const payload: UpdateSurveyDto = this.toUpdateDtoFull(original, current);
+  //   return this.http
+  //     .patch<Survey>(`${this.baseUrl}/survey/${current.id}`, payload)
+  //     .pipe(catchError((err) => this.handleError(err)));
+  // }
 
   softDeleteSurvey(id: string): Observable<void> {
     this.errorService.clearError();
+
     return this.http
       .delete<void>(`${this.baseUrl}/survey/${id}`)
       .pipe(catchError((err) => this.handleError(err)));
@@ -129,17 +106,10 @@ export class SurveyApiService {
 
   assignSurvey(payload: AssignSurveyPayload): Observable<void> {
     this.errorService.clearError();
+
     return this.http
       .post<void>(`${this.baseUrl}/submission-entry`, payload)
       .pipe(catchError((err) => this.handleError(err)));
-  }
-
-  private isTempId(id?: string | null): boolean {
-    return typeof id === 'string' && id.startsWith('tmp_');
-  }
-
-  private onlyRealIds(ids: Array<string | undefined | null>): string[] {
-    return ids.filter((id): id is string => typeof id === 'string' && !this.isTempId(id));
   }
 
   private toCreateDto(survey: Survey): CreateSurveyDto {
@@ -187,89 +157,97 @@ export class SurveyApiService {
     };
   }
 
-  private toUpdateDtoFull(original: Survey, current: Survey): UpdateSurveyDto {
-    const removeQuestionIds = this.diffRemovedQuestionIds(original, current);
+  // private isTempId(id?: string | null): boolean {
+  //   return typeof id === 'string' && id.startsWith('tmp_');
+  // }
 
-    const question: UpdateSurveyQuestionDto[] = (current.questions ?? []).map((q) => {
-      const isNewQ = this.isTempId(q.id);
+  // private onlyRealIds(ids: Array<string | undefined | null>): string[] {
+  //   return ids.filter((id): id is string => typeof id === 'string' && !this.isTempId(id));
+  // }
 
-      const qDto: UpdateSurveyQuestionDto = {
-        ...(isNewQ ? {} : { id: q.id }),
-        type: q.type,
-        title: q.title,
-        description: q.description ?? '',
-        required: q.required ?? true,
-      };
+  // private toUpdateDtoFull(original: Survey, current: Survey): UpdateSurveyDto {
+  //   const removeQuestionIds = this.diffRemovedQuestionIds(original, current);
 
-      if (q.type === SurveyType.RANGE) {
-        qDto.min = q.min ?? 0;
-        qDto.max = q.max ?? 10;
-      }
+  //   const question: UpdateSurveyQuestionDto[] = (current.questions ?? []).map((q) => {
+  //     const isNewQ = this.isTempId(q.id);
 
-      if (q.type === SurveyType.RADIO || q.type === SurveyType.RANGE) {
-        qDto.details = (q.details ?? []).map((d) => {
-          const isNewD = this.isTempId(d.id);
+  //     const qDto: UpdateSurveyQuestionDto = {
+  //       ...(isNewQ ? {} : { id: q.id }),
+  //       type: q.type,
+  //       title: q.title,
+  //       description: q.description ?? '',
+  //       required: q.required ?? true,
+  //     };
 
-          return {
-            ...(isNewD ? {} : { id: d.id }),
-            title: d.title,
-            explanation: d.explanation,
-            shortQuestion: d.shortQuestion ?? '',
-            point: d.point,
-          } satisfies UpdateSurveyQuestionDetailDto;
-        });
+  //     if (q.type === SurveyType.RANGE) {
+  //       qDto.min = q.min ?? 0;
+  //       qDto.max = q.max ?? 10;
+  //     }
 
-        const originalQ = (original.questions ?? []).find((oq) => oq.id === q.id);
-        qDto.removeDetailIds = originalQ ? this.diffRemovedDetailIds(originalQ, q) : [];
-      } else {
-        qDto.details = [];
-        qDto.removeDetailIds = [];
-      }
+  //     if (q.type === SurveyType.RADIO || q.type === SurveyType.RANGE) {
+  //       qDto.details = (q.details ?? []).map((d) => {
+  //         const isNewD = this.isTempId(d.id);
 
-      return qDto;
-    });
+  //         return {
+  //           ...(isNewD ? {} : { id: d.id }),
+  //           title: d.title,
+  //           explanation: d.explanation,
+  //           shortQuestion: d.shortQuestion ?? '',
+  //           point: d.point,
+  //         } satisfies UpdateSurveyQuestionDetailDto;
+  //       });
 
-    return {
-      title: current.title,
-      description: current.description ?? '',
-      question,
-      removeQuestionIds,
-    };
-  }
+  //       const originalQ = (original.questions ?? []).find((oq) => oq.id === q.id);
+  //       qDto.removeDetailIds = originalQ ? this.diffRemovedDetailIds(originalQ, q) : [];
+  //     } else {
+  //       qDto.details = [];
+  //       qDto.removeDetailIds = [];
+  //     }
 
-  private diffRemovedQuestionIds(original: Survey, current: Survey): string[] {
-    const origIds = new Set<string>(this.onlyRealIds((original.questions ?? []).map((q) => q.id)));
-    const currIds = new Set<string>(this.onlyRealIds((current.questions ?? []).map((q) => q.id)));
+  //     return qDto;
+  //   });
 
-    const removed: string[] = [];
-    for (const id of origIds) {
-      if (!currIds.has(id)) removed.push(id);
-    }
-    return removed;
-  }
+  //   return {
+  //     title: current.title,
+  //     description: current.description ?? '',
+  //     question,
+  //     removeQuestionIds,
+  //   };
+  // }
 
-  private diffRemovedDetailIds(
-    originalQ: { details?: { id?: string | null }[] },
-    currentQ: { details?: { id?: string | null }[] },
-  ): string[] {
-    const origIds = new Set<string>(
-      (originalQ.details ?? [])
-        .map((d) => d.id)
-        .filter((id): id is string => typeof id === 'string' && !this.isTempId(id)),
-    );
+  // private diffRemovedQuestionIds(original: Survey, current: Survey): string[] {
+  //   const origIds = new Set<string>(this.onlyRealIds((original.questions ?? []).map((q) => q.id)));
+  //   const currIds = new Set<string>(this.onlyRealIds((current.questions ?? []).map((q) => q.id)));
 
-    const currIds = new Set<string>(
-      (currentQ.details ?? [])
-        .map((d) => d.id)
-        .filter((id): id is string => typeof id === 'string' && !this.isTempId(id)),
-    );
+  //   const removed: string[] = [];
+  //   for (const id of origIds) {
+  //     if (!currIds.has(id)) removed.push(id);
+  //   }
+  //   return removed;
+  // }
 
-    const removed: string[] = [];
-    for (const id of origIds) {
-      if (!currIds.has(id)) removed.push(id);
-    }
-    return removed;
-  }
+  // private diffRemovedDetailIds(
+  //   originalQ: { details?: { id?: string | null }[] },
+  //   currentQ: { details?: { id?: string | null }[] },
+  // ): string[] {
+  //   const origIds = new Set<string>(
+  //     (originalQ.details ?? [])
+  //       .map((d) => d.id)
+  //       .filter((id): id is string => typeof id === 'string' && !this.isTempId(id)),
+  //   );
+
+  //   const currIds = new Set<string>(
+  //     (currentQ.details ?? [])
+  //       .map((d) => d.id)
+  //       .filter((id): id is string => typeof id === 'string' && !this.isTempId(id)),
+  //   );
+
+  //   const removed: string[] = [];
+  //   for (const id of origIds) {
+  //     if (!currIds.has(id)) removed.push(id);
+  //   }
+  //   return removed;
+  // }
 
   private handleError(err: HttpErrorResponse) {
     const rawMsg = err.error?.message;

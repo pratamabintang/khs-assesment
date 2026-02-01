@@ -7,6 +7,8 @@ import { BulkDownloadDto } from './dto/bulk-download.dto';
 import archiver from 'archiver';
 import { Role } from 'src/decorator/role.decorator';
 import { RoleEnum } from 'src/users/role.enum';
+import { DataIdParam } from './param/data-id.param';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('pdf')
 export class PdfController {
@@ -15,29 +17,41 @@ export class PdfController {
     private readonly penilaianService: PenilaianService,
   ) {}
 
-  @Get(':id')
+  @Throttle({
+    default: {
+      ttl: 1000,
+      limit: 1,
+    },
+  })
+  @Get(':dataId')
   async download(
     @Req() req: AuthRequest,
-    @Param('id') id: string,
+    @Param() param: DataIdParam,
     @Res() res: Response,
-  ) {
-    const data = await this.penilaianService.getData(req.user, id);
+  ): Promise<void> {
+    const data = await this.penilaianService.getData(req.user, param.dataId);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="penilaian_${id}.pdf"`,
+      `attachment; filename="penilaian_${param.dataId}.pdf"`,
     );
     res.send(await this.pdfService.renderPenilaianPdf(data));
   }
 
+  @Throttle({
+    default: {
+      ttl: 5000,
+      limit: 1,
+    },
+  })
   @Post('')
   @Role(RoleEnum.ADMIN)
   async downloadBulkZip(
     @Req() req: AuthRequest,
-    @Body() dto: BulkDownloadDto,
+    @Body() body: BulkDownloadDto,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader(
       'Content-Disposition',
@@ -52,12 +66,12 @@ export class PdfController {
 
     archive.pipe(res);
 
-    for (const submissionId of dto.submissionIds) {
-      const data = await this.penilaianService.getData(req.user, submissionId);
+    for (const dataId of body.dataIds) {
+      const data = await this.penilaianService.getData(req.user, dataId);
       const pdfBuffer = await this.pdfService.renderPenilaianPdf(data);
 
       archive.append(pdfBuffer, {
-        name: `penilaian_${submissionId}.pdf`,
+        name: `penilaian_${dataId}.pdf`,
       });
     }
 

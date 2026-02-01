@@ -1,0 +1,293 @@
+<div class="min-h-screen bg-slate-50">
+  <div class="mx-auto max-w-6xl p-6">
+    <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-fuchsia-50"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative p-6 sm:p-7">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="space-y-1">
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
+              {{ mode() === 'patch' ? 'Edit Survey' : 'Buat Survey' }}
+            </h1>
+            <p class="text-sm text-slate-600">
+              Susun judul, deskripsi, dan pertanyaan. Preview di panel kanan.
+            </p>
+
+            @if (mode() === 'patch' && originalSurvey()?.id) {
+              <div
+                class="mt-2 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs text-slate-600 ring-1 ring-slate-200"
+              >
+                <span class="font-medium">Survey ID</span>
+                <span class="font-mono text-slate-800">{{ originalSurvey()!.id }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60"
+              (click)="addQuestion()"
+              [disabled]="loading() || questions.length >= MAX_QUESTIONS"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Tambah Pertanyaan
+            </button>
+
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-emerald-200 disabled:opacity-60"
+              (click)="submitBuilder()"
+              [disabled]="loading()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7.414a2 2 0 00-.586-1.414l-2.414-2.414A2 2 0 0013.586 3H4z"
+                />
+                <path d="M6 9a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z" />
+              </svg>
+              Submit
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-wrap items-center gap-2">
+            <span
+              class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs text-slate-600 ring-1 ring-slate-200"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+              Mode: <span class="font-semibold text-slate-800">{{ mode() }}</span>
+            </span>
+
+            <span
+              class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-xs text-slate-600 ring-1 ring-slate-200"
+            >
+              Pertanyaan:
+              <span class="font-semibold text-slate-800">{{ questions.length }}</span>
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60"
+            (click)="goBack()"
+            [disabled]="loading()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L10.414 9H17a1 1 0 110 2h-6.586l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative mt-6">
+      @if (loading()) {
+        <div class="absolute inset-0 z-10 rounded-3xl bg-white/50 backdrop-blur-[2px]"></div>
+      }
+
+      <div
+        class="grid grid-cols-1 gap-6 lg:grid-cols-2"
+        [class.pointer-events-none]="loading()"
+        [class.select-none]="loading()"
+        [attr.aria-busy]="loading()"
+      >
+        <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div
+            class="sticky top-0 z-[1] rounded-t-3xl border-b border-slate-200 bg-white/80 backdrop-blur px-6 py-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold text-slate-900">Builder</div>
+                <div class="text-xs text-slate-500">Edit judul/deskripsi dan pertanyaan</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6">
+            @if (loading()) {
+              <div
+                class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"
+              >
+                Loading...
+              </div>
+            }
+            @if (errorMsg()) {
+              <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                {{ errorMsg() }}
+              </div>
+            }
+            @if (questions.length === 0) {
+              <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                Minimal harus ada <b>1 pertanyaan</b> sebelum bisa submit.
+              </div>
+            }
+
+            <form class="space-y-5" [formGroup]="builderForm">
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-700">Judul Survey</label>
+                <input
+                  class="w-full rounded-2xl border bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 disabled:opacity-60 border-slate-200 focus:ring-indigo-200"
+                  [class.border-rose-300]="showErr(builderForm.controls.title)"
+                  [class.focus:ring-rose-200]="showErr(builderForm.controls.title)"
+                  [class.js-invalid]="showErr(builderForm.controls.title)"
+                  formControlName="title"
+                  placeholder="Contoh: Kepuasan Pelanggan"
+                  [attr.maxlength]="LIMITS.surveyTitle"
+                />
+                <div class="flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Maks {{ LIMITS.surveyTitle }} karakter</span>
+                  <span
+                    >{{ builderForm.controls.title.value.length }}/{{ LIMITS.surveyTitle }}</span
+                  >
+                </div>
+
+                @if (showErr(builderForm.controls.title)) {
+                  <div class="text-xs text-rose-600">Judul survey wajib diisi.</div>
+                }
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-700">Deskripsi</label>
+                <textarea
+                  rows="2"
+                  class="w-full rounded-2xl border bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 disabled:opacity-60 border-slate-200 focus:ring-indigo-200"
+                  [class.border-rose-300]="showErr(builderForm.controls.description)"
+                  [class.focus:ring-rose-200]="showErr(builderForm.controls.description)"
+                  [class.js-invalid]="showErr(builderForm.controls.description)"
+                  formControlName="description"
+                  placeholder="Deskripsi singkat..."
+                  [attr.maxlength]="LIMITS.surveyDescription"
+                ></textarea>
+                <div class="flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Maks {{ LIMITS.surveyDescription }} karakter</span>
+                  <span
+                    >{{ builderForm.controls.description.value.length }}/{{
+                      LIMITS.surveyDescription
+                    }}</span
+                  >
+                </div>
+
+                @if (showErr(builderForm.controls.description)) {
+                  <div class="text-xs text-rose-600">Deskripsi survey wajib diisi.</div>
+                }
+              </div>
+
+              <div class="pt-2">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-sm font-semibold text-slate-900">Pertanyaan</h2>
+                  <span class="text-xs text-slate-500">Total: {{ questions.length }}</span>
+                </div>
+
+                @if (showErr(questions) && questions.hasError('minArrayLength')) {
+                  <div
+                    class="mt-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+                  >
+                    Minimal harus ada <b>1 pertanyaan</b>.
+                  </div>
+                }
+
+                @if (
+                  (questions.touched || submittedOnce()) && questions.hasError('maxArrayLength')
+                ) {
+                  <div
+                    class="mt-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+                  >
+                    Maksimal <b>{{ MAX_QUESTIONS }} pertanyaan</b>.
+                  </div>
+                }
+
+                <div class="mt-4 space-y-4" formArrayName="questions">
+                  @for (q of questions.controls; track q.controls.id.value; let i = $index) {
+                    <app-question-editor
+                      [group]="q"
+                      [index]="i"
+                      [submitted]="submittedOnce()"
+                      [canMoveUp]="i > 0"
+                      [canMoveDown]="i < questions.length - 1"
+                      (moveUp)="moveQuestion(i, -1)"
+                      (moveDown)="moveQuestion(i, +1)"
+                      (remove)="removeQuestion(i)"
+                    />
+                  }
+                  @if (questions.length === 0) {
+                    <div
+                      class="rounded-2xl border border-dashed border-slate-200 p-5 text-sm text-slate-600"
+                    >
+                      Belum ada pertanyaan. Klik <b>Tambah Pertanyaan</b>.
+                    </div>
+                  }
+                </div>
+              </div>
+            </form>
+
+            @if (builderForm.invalid && (builderForm.touched || submittedOnce())) {
+              <div
+                class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+              >
+                Masih ada field builder yang wajib diisi. Field yang bermasalah sudah ditandai
+                merah.
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div
+            class="sticky top-0 z-[1] rounded-t-3xl border-b border-slate-200 bg-white/80 backdrop-blur px-6 py-4"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-semibold text-slate-900">Preview</div>
+                <div class="text-xs text-slate-500">Tampilan end-user (builder mode)</div>
+              </div>
+
+              <span
+                class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+              >
+                Live
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/40 p-4">
+              <app-survey-dynamic-form [survey]="surveyPreviewSig()" mode="live" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

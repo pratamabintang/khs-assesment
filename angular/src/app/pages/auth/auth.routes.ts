@@ -5,21 +5,24 @@ import { PublicAuthGuard } from '../../guard/public-auth.guard';
 export const AUTH_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./auth').then((m) => m.Auth),
+    loadComponent: () => import('./auth.component').then((m) => m.AuthComponent),
     canActivate: [PublicAuthGuard],
     children: [
       {
         path: 'login',
-        loadComponent: () => import('./login/login').then((m) => m.Login),
+        loadComponent: () => import('./login/login.component').then((m) => m.LoginComponent),
       },
       {
         path: 'register',
-        loadComponent: () => import('./register/register').then((m) => m.Register),
+        loadComponent: () =>
+          import('./register/register.component').then((m) => m.RegisterComponent),
       },
       {
         path: 'forget-password',
         loadComponent: () =>
-          import('./forget-password/forget-password').then((m) => m.ForgetPassword),
+          import('./forget-password/forget-password.component').then(
+            (m) => m.ForgetPasswordComponent,
+          ),
       },
       {
         path: 'reset-password',
@@ -37,7 +40,8 @@ export const AUTH_ROUTES: Routes = [
             return true;
           },
         ],
-        loadComponent: () => import('./reset-password/reset-password').then((m) => m.ResetPassword),
+        loadComponent: () =>
+          import('./reset-password/reset-password.component').then((m) => m.ResetPasswordComponent),
       },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' },

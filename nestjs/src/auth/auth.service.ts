@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from '../dto/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { PasswordService } from '../users/password/password.service';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
@@ -17,13 +17,11 @@ import { MailService } from '../mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ForgetPassword } from './forget-password/forget-password.entity';
 import { Repository } from 'typeorm';
-import {
-  ResetPasswordDto,
-  ResetPasswordParams,
-} from './dto/reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import type { StringValue } from 'ms';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import { ResetPasswordQuery } from './query/reset-password.query';
 
 @Injectable()
 export class AuthService {
@@ -37,25 +35,11 @@ export class AuthService {
   ) {}
 
   public async register(createUserDto: CreateUserDto): Promise<User> {
-    const emailCheck = await this.userService.findOneByEmail(
-      createUserDto.email,
-    );
+    return await this.userService.createUser(createUserDto);
+  }
 
-    if (emailCheck) {
-      throw new ConflictException('email already exists');
-    }
-
-    const phoneNumberCheck = await this.userService.findOneByPhoneNumber(
-      createUserDto.phoneNumber,
-    );
-
-    if (phoneNumberCheck) {
-      throw new ConflictException('phone number already exists');
-    }
-
-    const user = await this.userService.createUser(createUserDto);
-
-    return user;
+  public async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
+    return await this.userService.updateUser(userId, dto);
   }
 
   public async login(
@@ -83,41 +67,6 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
-    const user = await this.userService.findOne(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    const forbiddenKeys = [
-      'password',
-      'refreshToken',
-      'role',
-      'employees',
-      'entry',
-      'forgetPassword',
-    ];
-    for (const k of forbiddenKeys) {
-      if (dto[k] !== undefined) {
-        throw new BadRequestException(`Field "${k}" is not allowed`);
-      }
-    }
-
-    if (dto.email && dto.email !== user.email) {
-      const exists = await this.userService.findOneByEmail(dto.email);
-      if (exists) throw new BadRequestException('Email already in use');
-    }
-
-    if (dto.phoneNumber && dto.phoneNumber !== user.phoneNumber) {
-      const exists = await this.userService.findOneByPhoneNumber(
-        dto.phoneNumber,
-      );
-      if (exists) throw new BadRequestException('Phone number already in use');
-    }
-
-    Object.assign(user, dto);
-
-    return await this.userService.saveUser(user);
-  }
-
   public async refresh(refreshToken: string): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -143,11 +92,14 @@ export class AuthService {
     return { accessToken, refreshToken: newRefreshToken };
   }
 
-  async logout(userId: string) {
+  public async logout(userId: string): Promise<void> {
     await this.removeRefreshTokenHash(userId);
   }
 
-  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  public async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<void> {
     if (dto.currentPassword === dto.newPassword)
       throw new BadRequestException(
         'new password must be different from current password',
@@ -167,7 +119,7 @@ export class AuthService {
     await this.userService.removeRefreshTokenHash(userId);
   }
 
-  async forgotPassword(email: string): Promise<void> {
+  public async forgotPassword(email: string): Promise<void> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) throw new NotFoundException('Email tidak terdaftar');
 
@@ -202,8 +154,8 @@ export class AuthService {
     await this.mailService.sendResetPasswordEmail(email, resetLink);
   }
 
-  async resetPassword(
-    userParams: ResetPasswordParams,
+  public async resetPassword(
+    userParams: ResetPasswordQuery,
     dto: ResetPasswordDto,
   ): Promise<void> {
     const user = await this.userService.findOneByEmail(userParams.email);

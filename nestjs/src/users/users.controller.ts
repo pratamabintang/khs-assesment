@@ -5,14 +5,14 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Role } from 'src/decorator/role.decorator';
 import { RoleEnum } from './role.enum';
-import { User } from './user.entity';
 import type { AuthRequest } from 'src/request/auth.request';
+import { UserIdParam } from './param/user-id.param';
+import { UserResponse } from './response/user.response';
 
 @Controller('users')
 export class UsersController {
@@ -20,17 +20,18 @@ export class UsersController {
 
   @Get('')
   @Role(RoleEnum.ADMIN)
-  async getAll(): Promise<User[] | null> {
-    return await this.usersService.findAll();
+  async getAll(): Promise<UserResponse[] | null> {
+    const users = await this.usersService.findAll();
+    return UserResponse.fromArray(users ?? []);
   }
 
-  @Delete(':id')
+  @Delete(':userId')
   @Role(RoleEnum.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
+  async remove(
     @Req() req: AuthRequest,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ) {
-    return this.usersService.removeUser(req.user, id);
+    @Param() param: UserIdParam,
+  ): Promise<void> {
+    return await this.usersService.removeUser(req.user, param.userId);
   }
 }

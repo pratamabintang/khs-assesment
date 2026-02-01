@@ -12,7 +12,7 @@ import { RoleEnum } from './role.enum';
 import { Exclude, Expose } from 'class-transformer';
 import { ForgetPassword } from '../auth/forget-password/forget-password.entity';
 import { Employee } from '../employee/employee.entity';
-import { SurveySubmissionEntry } from 'src/survey/survey-submission/survey-submission.entity';
+import { Entry } from 'src/survey/entry/entry.entity';
 
 @Entity()
 @Exclude()
@@ -66,16 +66,12 @@ export class User {
   employees: Employee[];
 
   @Exclude()
-  @OneToMany(
-    () => SurveySubmissionEntry,
-    (entry: SurveySubmissionEntry) => entry.user,
-    {
-      nullable: true,
-      cascade: true,
-      eager: false,
-    },
-  )
-  entry?: SurveySubmissionEntry[];
+  @OneToMany(() => Entry, (entry: Entry) => entry.user, {
+    nullable: true,
+    cascade: true,
+    eager: false,
+  })
+  entry?: Entry[];
 
   @Expose()
   @CreateDateColumn({ type: 'timestamptz' })

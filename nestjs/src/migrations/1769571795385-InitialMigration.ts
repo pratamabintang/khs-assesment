@@ -4,10 +4,8 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
   name = 'InitialSurveyMigration1769571795385';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // UUID generator
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
-    // ENUM for SurveyQuestion.type (must exist before table)
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -18,15 +16,11 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
           WHERE t.typname = 'survey_question_type_enum'
             AND n.nspname = 'public'
         ) THEN
-          -- IMPORTANT: sesuaikan value enum ini dengan SurveyType di src (survey.type.ts)
           CREATE TYPE "public"."survey_question_type_enum" AS ENUM ('range', 'radio', 'textarea');
         END IF;
       END$$;
     `);
 
-    // ===== Tables =====
-
-    // survey
     await queryRunner.query(`
       CREATE TABLE "survey" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -39,7 +33,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       )
     `);
 
-    // survey_question
     await queryRunner.query(`
       CREATE TABLE "survey_question" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -56,7 +49,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       )
     `);
 
-    // survey_question_detail
     await queryRunner.query(`
       CREATE TABLE "survey_question_detail" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -69,8 +61,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       )
     `);
 
-    // ===== FKs =====
-    // SurveyQuestion.survey -> Survey (CASCADE delete)
     await queryRunner.query(`
       ALTER TABLE "survey_question"
       ADD CONSTRAINT "FK_survey_question_survey"
@@ -80,7 +70,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       ON UPDATE NO ACTION
     `);
 
-    // SurveyQuestionDetail.survey -> SurveyQuestion (CASCADE delete)
     await queryRunner.query(`
       ALTER TABLE "survey_question_detail"
       ADD CONSTRAINT "FK_survey_question_detail_question"
@@ -90,7 +79,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       ON UPDATE NO ACTION
     `);
 
-    // (Optional tapi bagus) index untuk FK
     await queryRunner.query(
       `CREATE INDEX "IDX_survey_question_surveyId" ON "survey_question" ("surveyId")`,
     );
@@ -100,7 +88,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // drop indexes
     await queryRunner.query(
       `DROP INDEX IF EXISTS "IDX_survey_question_detail_surveyId"`,
     );
@@ -108,7 +95,6 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       `DROP INDEX IF EXISTS "IDX_survey_question_surveyId"`,
     );
 
-    // drop FKs
     await queryRunner.query(`
       ALTER TABLE "survey_question_detail"
       DROP CONSTRAINT IF EXISTS "FK_survey_question_detail_question"
@@ -118,12 +104,10 @@ export class InitialSurveyMigration1769571795385 implements MigrationInterface {
       DROP CONSTRAINT IF EXISTS "FK_survey_question_survey"
     `);
 
-    // drop tables
     await queryRunner.query(`DROP TABLE IF EXISTS "survey_question_detail"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "survey_question"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "survey"`);
 
-    // drop enum type (after tables)
     await queryRunner.query(
       `DROP TYPE IF EXISTS "public"."survey_question_type_enum"`,
     );

@@ -3,7 +3,5 @@ export interface Employee {
   fullName: string;
   position: string;
   isActive: boolean;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  userId: string | null;
 }

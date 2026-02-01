@@ -1,14 +1,11 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddAuthAndEmployeeTables1769579999999
-  implements MigrationInterface
-{
+export class AddAuthAndEmployeeTables1769579999999 implements MigrationInterface {
   name = 'AddAuthAndEmployeeTables1769579999999';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
-    // ===== ENUM user.role =====
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -24,7 +21,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // ===== user table =====
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "user" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -48,7 +44,6 @@ export class AddAuthAndEmployeeTables1769579999999
       )
     `);
 
-    // ===== employees table =====
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "employees" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -63,8 +58,6 @@ export class AddAuthAndEmployeeTables1769579999999
       )
     `);
 
-    // ===== forget_password table =====
-    // (PK userId berarti 1 user cuma punya 1 token aktif)
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "forget_password" (
         "userId" uuid NOT NULL,
@@ -75,7 +68,6 @@ export class AddAuthAndEmployeeTables1769579999999
       )
     `);
 
-    // ===== survey_submissions table =====
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "survey_submissions" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -88,14 +80,11 @@ export class AddAuthAndEmployeeTables1769579999999
       )
     `);
 
-    // Unique index (employeeId, surveyId, periodMonth)
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "IDX_survey_submissions_unique_period"
       ON "survey_submissions" ("employeeId", "surveyId", "periodMonth")
     `);
 
-    // ===== Foreign Keys =====
-    // employees.userId -> user.id
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -110,7 +99,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // forget_password.userId -> user.id
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -125,7 +113,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // survey_submissions.employeeId -> employees.id
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -140,7 +127,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // survey_submissions.surveyId -> survey.id
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -155,7 +141,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // survey_submissions.userId -> user.id
     await queryRunner.query(`
       DO $$
       BEGIN
@@ -170,7 +155,6 @@ export class AddAuthAndEmployeeTables1769579999999
       END$$;
     `);
 
-    // (Optional) index untuk FK biar query cepat
     await queryRunner.query(
       `CREATE INDEX IF NOT EXISTS "IDX_employees_userId" ON "employees" ("userId")`,
     );
@@ -189,15 +173,23 @@ export class AddAuthAndEmployeeTables1769579999999
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // drop indexes
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_survey_submissions_userId"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_survey_submissions_surveyId"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_survey_submissions_employeeId"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_forget_password_userId"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_survey_submissions_userId"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_survey_submissions_surveyId"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_survey_submissions_employeeId"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_forget_password_userId"`,
+    );
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_employees_userId"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_survey_submissions_unique_period"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_survey_submissions_unique_period"`,
+    );
 
-    // drop FKs
     await queryRunner.query(
       `ALTER TABLE "survey_submissions" DROP CONSTRAINT IF EXISTS "FK_survey_submissions_user"`,
     );
@@ -214,13 +206,11 @@ export class AddAuthAndEmployeeTables1769579999999
       `ALTER TABLE "employees" DROP CONSTRAINT IF EXISTS "FK_employees_user"`,
     );
 
-    // drop tables
     await queryRunner.query(`DROP TABLE IF EXISTS "survey_submissions"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "forget_password"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "employees"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "user"`);
 
-    // drop enum (optional; hanya kalau kamu yakin tidak dipakai tabel lain)
     await queryRunner.query(`DROP TYPE IF EXISTS "public"."user_role_enum"`);
   }
 }

@@ -5,25 +5,23 @@ import { onlyAdmin } from '../../guard/roles';
 export const ADMIN_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./admin').then((m) => m.AdminComponent),
+    loadComponent: () => import('./admin.component').then((m) => m.AdminComponent),
     canMatch: onlyAdmin,
     children: [
       {
         path: 'manage',
-        loadComponent: () =>
-          import('./manage/admin-outsourcing').then((m) => m.AdminOutsourcingComponent),
+        loadComponent: () => import('./manage/manage.component').then((m) => m.ManageComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'submission',
-        loadComponent: () =>
-          import('./submission/admin-submission').then((m) => m.AdminSubmissionListComponent),
+        loadComponent: () => import('./submission/entry.component').then((m) => m.EntryComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'submission/:id',
         loadComponent: () =>
-          import('./submission/survey-readonly').then((m) => m.AdminSurveyViewPageComponent),
+          import('./submission/submission.component').then((m) => m.SubmissionComponent),
         canActivate: [AuthGuard],
       },
       {

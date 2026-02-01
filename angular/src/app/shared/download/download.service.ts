@@ -2,16 +2,13 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { ErrorService } from '../error.service';
-
-type bulkDownloadDto = {
-  submissionIds: string[];
-};
+import { BulkDownloadDto } from './dto/bulk-download.dto';
 
 @Injectable({ providedIn: 'root' })
 export class DownloadService {
   private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api/pdf';
+  private readonly baseUrl = 'https://localhost:3000/api/pdf';
 
   downloadPdf(id: string): Observable<Blob> {
     this.errorService.clearError();
@@ -22,10 +19,10 @@ export class DownloadService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  downloadBulkZip(dto: bulkDownloadDto): Observable<Blob> {
+  downloadBulkZip(body: BulkDownloadDto): Observable<Blob> {
     const date = new Date();
     return this.http
-      .post(this.baseUrl, dto, {
+      .post(this.baseUrl, body, {
         responseType: 'blob',
         observe: 'body',
       })

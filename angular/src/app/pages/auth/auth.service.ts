@@ -1,50 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, map, Observable, of, tap, throwError, timeout } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap, throwError, timeout } from 'rxjs';
 import { ErrorService } from '../../shared/error.service';
 import { AuthStateService } from './auth-state.service';
 import { Router } from '@angular/router';
 import { RoleEnum } from '../../shared/type/role.enum';
-
-export interface CreateUserDtoPayload {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  province: string;
-  regency: string;
-  district: string;
-  village: string;
-  fullAddress: string;
-}
-
-export interface RegisterResponse {
-  message?: string;
-  data?: any;
-}
-
-export interface LoginDtoPayload {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken?: string;
-}
-
-export interface ForgetPasswordDto {
-  email: string;
-}
-
-export interface ResetPasswordDto {
-  password: string;
-}
-
-export interface ResetPasswordParams {
-  email: string;
-  token: string;
-}
+import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { ForgetPasswordDto } from './dto/forget-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetPasswordQuery } from './query/reset-password.query';
+import { UserResponse } from './response/user.response';
+import { AccessTokenResponse } from './response/access-token.response';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -53,26 +20,26 @@ export class AuthService {
   private authStateService = inject(AuthStateService);
   private router = inject(Router);
 
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = 'https://localhost:3000/api';
 
-  private readonly ROLE_HOME: Partial<Record<RoleEnum, string>> = {
+  readonly ROLE_HOME: Partial<Record<RoleEnum, string>> = {
     [RoleEnum.ADMIN]: '/admin',
     [RoleEnum.USER]: '/user',
   };
 
-  register(payload: CreateUserDtoPayload): Observable<RegisterResponse> {
+  register(body: CreateUserDto): Observable<UserResponse> {
     this.errorService.clearError();
 
     return this.http
-      .post<RegisterResponse>(`${this.baseUrl}/auth/register`, payload)
+      .post<UserResponse>(`${this.baseUrl}/auth/register`, body)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  login(payload: LoginDtoPayload): Observable<LoginResponse> {
+  login(body: LoginDto): Observable<AccessTokenResponse> {
     this.errorService.clearError();
 
     return this.http
-      .post<LoginResponse>(`${this.baseUrl}/auth/login`, payload, { withCredentials: true })
+      .post<AccessTokenResponse>(`${this.baseUrl}/auth/login`, body, { withCredentials: true })
       .pipe(
         tap((res) => {
           this.authStateService.setAccessToken(res.accessToken);
@@ -86,14 +53,24 @@ export class AuthService {
       );
   }
 
-  refresh(): Observable<string> {
+  refresh(): Observable<AccessTokenResponse> {
     this.errorService.clearError();
 
     return this.http
-      .post<{
-        accessToken: string;
-      }>(`${this.baseUrl}/auth/refresh`, {}, { withCredentials: true })
+      .get<{ csrfToken: string }>(`${this.baseUrl}/auth/csrf`, { withCredentials: true })
       .pipe(
+        map((r) => r.csrfToken),
+        switchMap((csrfToken) => {
+          if (!csrfToken) throw new Error('Missing csrfToken from /auth/csrf');
+          return this.http.post<AccessTokenResponse>(
+            `${this.baseUrl}/auth/refresh`,
+            {},
+            {
+              withCredentials: true,
+              headers: { 'X-CSRF-Token': csrfToken },
+            },
+          );
+        }),
         timeout(5000),
         tap((res) => {
           this.authStateService.setAccessToken(res.accessToken);
@@ -101,7 +78,6 @@ export class AuthService {
           const role = this.extractRoleFromToken(res.accessToken);
           if (role) this.authStateService.setRole(role);
         }),
-        map((res) => res.accessToken),
         catchError((err: HttpErrorResponse) => {
           this.authStateService.clear();
           return throwError(() => err);
@@ -109,7 +85,7 @@ export class AuthService {
       );
   }
 
-  logout() {
+  logout(): void {
     this.http
       .post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(catchError(() => of(null)))
@@ -127,19 +103,23 @@ export class AuthService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  resetPassword(payload: ResetPasswordDto, param: ResetPasswordParams): Observable<Object> {
+  resetPassword(body: ResetPasswordDto, query: ResetPasswordQuery): void {
+    this.errorService.clearError();
+
+    this.http
+      .post(`${this.baseUrl}/auth/reset-password?email=${query.email}&token=${query.token}`, body)
+      .pipe(catchError((err) => this.handleError(err)))
+      .subscribe(() => {
+        this.router.navigate(['/auth', 'login']);
+      });
+  }
+
+  getProfile(): Observable<UserResponse> {
     this.errorService.clearError();
 
     return this.http
-      .post(
-        `${this.baseUrl}/auth/reset-password?email=${param.email}&token=${param.token}`,
-        payload,
-      )
+      .get<UserResponse>(`${this.baseUrl}/auth/profile`)
       .pipe(catchError((err) => this.handleError(err)));
-  }
-
-  getProfile() {
-    return this.http.get(`${this.baseUrl}/auth/profile`);
   }
 
   private decodeJwtPayload(token: string): any | null {

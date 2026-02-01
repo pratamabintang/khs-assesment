@@ -2,25 +2,25 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { inject, Injectable, signal } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { ErrorService } from '../../shared/error.service';
-import { SurveySubmissionEntry } from '../../shared/type/survey-submission/survey-submission-entry.type';
-import { SurveySubmission } from '../../shared/type/survey-submission/survey-submission.type';
-import { Survey } from '../../shared/type/survey/survey.type';
+import { Entry } from '../../shared/type/survey-submission/entry.type';
 import { User } from '../../shared/type/user.type';
 import { Employee } from '../../shared/type/employee.type';
 import { AuthService } from '../auth/auth.service';
+import { SubmissionResponse } from './response/submission.response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdminService {
   private readonly authService = inject(AuthService);
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
-  readonly selectedEntry = signal<SurveySubmissionEntry | null>(null);
 
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = 'https://localhost:3000/api';
 
-  setFromEntry(entry: SurveySubmissionEntry) {
+  readonly selectedEntry = signal<Entry | null>(null);
+
+  setFromEntry(entry: Entry) {
     this.selectedEntry.set(entry ?? null);
   }
 
@@ -28,25 +28,20 @@ export class AdminService {
     this.selectedEntry.set(null);
   }
 
-  getSurveySubmission(
-    submissionId: string,
-  ): Observable<{ survey: Survey; submission: SurveySubmission }> {
+  getSurveySubmission(submissionId: string): Observable<SubmissionResponse> {
     this.errorService.clearError();
 
     return this.http
-      .get<{
-        survey: Survey;
-        submission: SurveySubmission;
-      }>(`${this.baseUrl}/submission/${submissionId}`)
+      .get<SubmissionResponse>(`${this.baseUrl}/submission/${submissionId}`)
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  getAllAdmin(from?: string, to?: string): Observable<SurveySubmissionEntry[]> {
+  getAllAdmin(from?: string, to?: string): Observable<Entry[]> {
     this.errorService.clearError();
 
     const params = this.buildParams({ from, to });
     return this.http
-      .get<SurveySubmissionEntry[]>(`${this.baseUrl}/submission-entry/admin`, {
+      .get<Entry[]>(`${this.baseUrl}/submission-entry/admin`, {
         params,
       })
       .pipe(catchError((err) => this.handleError(err)));
@@ -92,7 +87,7 @@ export class AdminService {
       .pipe(catchError((err) => this.handleError(err)));
   }
 
-  assignEmployee(employeeId: string, userId: string | null): Observable<boolean> {
+  assignEmployee(employeeId: string, userId?: string): Observable<boolean> {
     this.errorService.clearError();
 
     return this.http

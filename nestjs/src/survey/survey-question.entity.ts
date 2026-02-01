@@ -54,7 +54,7 @@ export class SurveyQuestion {
 
   @Expose()
   @OneToMany(() => SurveyQuestionDetail, (question) => question.survey, {
-    cascade: true, // insert/update otomatis
+    cascade: true,
     eager: false,
   })
   details?: SurveyQuestionDetail[];

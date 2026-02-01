@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import * as fs from 'fs';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -29,12 +30,13 @@ async function bootstrap() {
   }
 
   app.use(cookieParser());
+  app.use(helmet());
   app.setGlobalPrefix('api');
 
   app.enableCors({
     origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
     credentials: true,
   });
 

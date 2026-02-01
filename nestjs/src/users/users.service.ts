@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Not, Repository } from 'typeorm';
@@ -7,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RoleEnum } from './role.enum';
 import { EmployeesService } from 'src/employee/employee.service';
 import { JwtPayload } from 'src/auth/jwt-payload.type';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +24,20 @@ export class UsersService {
   ) {}
 
   public async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const emailCheck = await this.findOneByEmail(createUserDto.email);
+
+    if (emailCheck) {
+      throw new ConflictException('email already exists');
+    }
+
+    const phoneNumberCheck = await this.findOneByPhoneNumber(
+      createUserDto.phoneNumber,
+    );
+
+    if (phoneNumberCheck) {
+      throw new ConflictException('phone number already exists');
+    }
+
     const hashed_password = await this.passwordService.hash(
       createUserDto.password,
     );
@@ -28,6 +48,35 @@ export class UsersService {
     });
 
     return await this.userRepository.save(user);
+  }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const forbiddenKeys = [
+      'email',
+      'password',
+      'refreshToken',
+      'role',
+      'employees',
+      'entry',
+      'forgetPassword',
+    ];
+    for (const k of forbiddenKeys) {
+      if (dto[k] !== undefined) {
+        throw new BadRequestException(`Field "${k}" is not allowed`);
+      }
+    }
+
+    if (dto.phoneNumber && dto.phoneNumber !== user.phoneNumber) {
+      const exists = await this.findOneByPhoneNumber(dto.phoneNumber);
+      if (exists) throw new BadRequestException('Phone number already in use');
+    }
+
+    Object.assign(user, dto);
+
+    return await this.saveUser(user);
   }
 
   public async saveUser(user: User): Promise<User> {

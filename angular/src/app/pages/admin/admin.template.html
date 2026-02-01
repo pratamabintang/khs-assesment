@@ -1,0 +1,18 @@
+<app-hamburger-nav
+  [links]="[
+    {
+      label: 'Manajemen',
+      path: '/admin/manage',
+    },
+    {
+      label: 'Histori',
+      path: '/admin/submission',
+    },
+    {
+      label: 'Survey Builder',
+      path: '/admin/survey',
+    },
+  ]"
+  (logout)="onLogout()"
+/>
+<router-outlet></router-outlet>

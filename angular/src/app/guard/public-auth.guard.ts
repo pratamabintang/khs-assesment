@@ -9,13 +9,13 @@ export const PublicAuthGuard: CanActivateFn = () => {
   const authState = inject(AuthStateService);
   const authService = inject(AuthService);
 
-  if (authState.getAccessToken()) {
-    return router.createUrlTree(['/user/employees']);
+  if (authState.getAccessToken() && authState.getRole()) {
+    return router.createUrlTree([authService.ROLE_HOME[authState.getRole()!]!]);
   }
 
   return authService.refresh().pipe(
     map(() => {
-      return router.createUrlTree(['/user/employees']);
+      return router.createUrlTree([authService.ROLE_HOME[authState.getRole()!]!]);
     }),
     catchError(() => {
       return of(true);

@@ -6,7 +6,6 @@ import { Injectable, signal } from '@angular/core';
 export class ErrorService {
   private _error = signal<string[]>([]);
 
-  // readonly signal
   error = this._error.asReadonly();
 
   showError(message: string | string[]) {

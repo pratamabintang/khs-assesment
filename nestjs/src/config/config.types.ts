@@ -1,11 +1,4 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import Joi from 'joi';
-import { AuthConfig } from './auth.config';
-
-export interface ConfigType {
-  database: TypeOrmModuleOptions;
-  auth: AuthConfig;
-}
 
 export const appConfigSchema = Joi.object({
   DB_HOST: Joi.string().default('localhost'),

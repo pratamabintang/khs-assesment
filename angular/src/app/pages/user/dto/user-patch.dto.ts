@@ -1,6 +1,6 @@
 import { UserExposeDto } from './user-expose.dto';
 
-export type PatchUserPayload = Partial<Pick<UserExposeDto, 'nama' | 'email' | 'phoneNumber'>> & {
+export type PatchUserPayload = Partial<Pick<UserExposeDto, 'name' | 'email' | 'phoneNumber'>> & {
   province: string;
   regency: string;
   district: string;

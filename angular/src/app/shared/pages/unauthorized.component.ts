@@ -7,62 +7,7 @@ import { AuthService } from '../../pages/auth/auth.service';
   selector: 'app-unauthorized',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div
-      class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50 px-6"
-    >
-      <div
-        class="w-full max-w-md rounded-3xl border border-slate-200 bg-white shadow-xl p-8 text-center"
-      >
-        <div
-          class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-200"
-        >
-          <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 9v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <path
-              d="M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-
-        <h1 class="mt-6 text-2xl font-bold tracking-tight text-slate-900">Akses Ditolak</h1>
-
-        <p class="mt-2 text-sm text-slate-600 leading-relaxed">
-          Kamu tidak memiliki izin untuk mengakses halaman ini.
-          <br />
-          Silakan hubungi administrator jika kamu merasa ini adalah kesalahan.
-        </p>
-
-        <div class="mt-8 flex flex-col gap-3">
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow
-                   hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            (click)="goBack()"
-          >
-            Kembali
-          </button>
-
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700
-                   hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            (click)="logout()"
-          >
-            Keluar & Login Ulang
-          </button>
-        </div>
-
-        <div class="mt-6 text-[11px] text-slate-400">
-          Error code: <span class="font-semibold">403</span>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './unauthorized.template.html',
 })
 export class UnauthorizedComponent {
   private readonly router = inject(Router);

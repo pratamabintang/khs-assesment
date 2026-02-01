@@ -6,18 +6,19 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   Req,
 } from '@nestjs/common';
 import { EmployeesService } from './employee.service';
-import { CreateEmployeeDto } from '../dto/create-employee.dto';
-import { UpdateEmployeeDto } from '../dto/update-employee.dto';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import type { AuthRequest } from '../request/auth.request';
 import { RoleEnum } from '../users/role.enum';
 import { Role } from '../decorator/role.decorator';
-import { Employee } from './employee.entity';
+import { EmployeeResponse } from './response/employee.response';
+import { EmployeeIdParam } from './param/employee-id.param';
+import { AssignJobDto } from './dto/assign-job.dto';
 
 @Controller('employees')
 export class EmployeesController {
@@ -25,66 +26,64 @@ export class EmployeesController {
 
   @Post('')
   @Role(RoleEnum.ADMIN)
-  create(@Body() dto: CreateEmployeeDto): Promise<Employee> {
-    return this.employeesService.create(dto);
+  async create(@Body() body: CreateEmployeeDto): Promise<EmployeeResponse> {
+    return new EmployeeResponse(await this.employeesService.create(body));
   }
 
   @Get('')
-  findAll(@Req() req: AuthRequest) {
-    return this.employeesService.findAll(req.user);
+  async findAll(@Req() req: AuthRequest): Promise<EmployeeResponse[]> {
+    return EmployeeResponse.fromArray(
+      await this.employeesService.findAll(req.user),
+    );
   }
 
-  @Get(':id')
-  findOne(
+  @Get(':employeeId')
+  async findOne(
     @Req() req: AuthRequest,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ) {
-    return this.employeesService.findOne(req.user, id);
+    @Param() param: EmployeeIdParam,
+  ): Promise<EmployeeResponse> {
+    return new EmployeeResponse(
+      await this.employeesService.findOne(req.user, param.employeeId),
+    );
   }
 
-  @Patch(':id')
+  @Patch(':employeeId')
   @Role(RoleEnum.ADMIN)
-  update(
+  async update(
     @Req() req: AuthRequest,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param() param: EmployeeIdParam,
     @Body() dto: UpdateEmployeeDto,
-  ): Promise<Employee> {
-    return this.employeesService.update(req.user, id, dto);
+  ): Promise<EmployeeResponse> {
+    return new EmployeeResponse(
+      await this.employeesService.update(req.user, param.employeeId, dto),
+    );
   }
 
-  @Patch(':id/active')
-  @Role(RoleEnum.ADMIN)
-  setActive(
-    @Req() req: AuthRequest,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() body: { isActive: boolean },
-  ) {
-    return this.employeesService.setActive(req.user, id, body.isActive);
-  }
-
-  @Delete(':id')
+  @Delete(':employeeId')
   @Role(RoleEnum.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(
     @Req() req: AuthRequest,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ) {
-    return this.employeesService.remove(req.user, id);
+    @Param() param: EmployeeIdParam,
+  ): Promise<void> {
+    return this.employeesService.remove(req.user, param.employeeId);
   }
 
-  @Patch('assign/:id')
+  @Patch('assign/:employeeId')
   @Role(RoleEnum.ADMIN)
   async assignJob(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() body: { userId: string | null },
+    @Param() param: EmployeeIdParam,
+    @Body() body: AssignJobDto,
   ): Promise<boolean> {
-    console.log('masuk');
     if (body.userId) {
-      const res = await this.employeesService.assignJob(id, body.userId);
+      const res = await this.employeesService.assignJob(
+        param.employeeId,
+        body.userId,
+      );
       return res.affected !== 0;
     }
 
-    const res = await this.employeesService.unAssignJob(id);
+    const res = await this.employeesService.unAssignJob(param.employeeId);
     return res.affected !== 0;
   }
 }

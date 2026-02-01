@@ -13,7 +13,7 @@ import { AuthStateService } from './auth-state.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  private apiBase = 'https://karyahusadasejahtera.web.id/api';
+  private apiBase = 'https://localhost:3000/api';
   private refreshing = false;
   private refreshedToken$ = new BehaviorSubject<string | null>(null);
 
@@ -25,8 +25,6 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const isApiCall = req.url.startsWith(this.apiBase);
 
-    // ✅ Endpoint yang TIDAK perlu Authorization header
-    // (logout sengaja TIDAK dimasukkan agar tetap kirim Bearer token)
     const skipAuthHeader =
       req.url.includes('/auth/login') ||
       req.url.includes('/auth/register') ||
@@ -34,8 +32,6 @@ export class AuthInterceptor implements HttpInterceptor {
       req.url.includes('/auth/forget-password') ||
       req.url.includes('/auth/reset-password');
 
-    // ✅ Endpoint yang TIDAK boleh memicu auto-refresh saat 401
-    // (logout masuk di sini supaya kalau logout 401 tidak mencoba refresh)
     const skip401Refresh =
       req.url.includes('/auth/login') ||
       req.url.includes('/auth/refresh') ||
@@ -59,7 +55,6 @@ export class AuthInterceptor implements HttpInterceptor {
           return throwError(() => err);
         }
 
-        // Kalau refresh sedang jalan, request lain menunggu token baru
         if (this.refreshing) {
           return this.refreshedToken$.pipe(
             filter((t) => t !== null),
@@ -74,20 +69,20 @@ export class AuthInterceptor implements HttpInterceptor {
         this.refreshedToken$.next(null);
 
         return this.auth.refresh().pipe(
-          switchMap((newToken) => {
+          switchMap((res) => {
             this.refreshing = false;
-            this.refreshedToken$.next(newToken);
+            this.refreshedToken$.next(res.accessToken);
 
             return next.handle(
               req.clone({
-                setHeaders: { Authorization: `Bearer ${newToken}` },
+                setHeaders: { Authorization: `Bearer ${res.accessToken}` },
               }),
             );
           }),
-          catchError((refreshErr) => {
+          catchError((err) => {
             this.refreshing = false;
-            this.auth.logout(); // akan clear state + navigate login
-            return throwError(() => refreshErr);
+            this.auth.logout();
+            return throwError(() => err);
           }),
         );
       }),

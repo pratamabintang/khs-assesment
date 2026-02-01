@@ -10,9 +10,21 @@ import { SurveyModule } from './survey/survey.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PdfModule } from './pdf/pdf.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppController } from './app.controller';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'default',
+          ttl: 1000,
+          limit: 10,
+        },
+      ],
+    }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -32,7 +44,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     SurveyModule,
     PdfModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

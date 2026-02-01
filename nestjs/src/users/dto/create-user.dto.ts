@@ -11,14 +11,17 @@ import {
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
+  @MaxLength(64)
   name: string;
 
   @IsNotEmpty()
   @IsEmail()
+  @MaxLength(254)
   email: string;
 
   @IsNotEmpty()
   @IsPhoneNumber('ID')
+  @MaxLength(16)
   phoneNumber: string;
 
   @IsNotEmpty()

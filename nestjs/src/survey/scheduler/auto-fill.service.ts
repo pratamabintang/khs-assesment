@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SurveySubmissionEntry } from '../survey-submission/survey-submission.entity';
 import { IsNull, Repository } from 'typeorm';
 import { SurveyQuestion } from '../survey-question.entity';
 import { SurveyType } from '../survey.type';
 import { SurveyQuestionDetail } from '../survey-question-detail.entity';
-import { SurveySubmission } from '../schema/survey-submission.schema';
+import { Data } from '../data/data.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SurveyAnswer } from '../schema/survey-answer.schema';
+import { DataAnswer } from '../data/data-answer.schema';
+import { Entry } from '../entry/entry.entity';
 
 @Injectable()
 export class AutoFillSubmission {
   constructor(
-    @InjectRepository(SurveySubmissionEntry)
-    private readonly entryRepo: Repository<SurveySubmissionEntry>,
-    @InjectModel(SurveySubmission.name)
-    private readonly submissionModel: Model<SurveySubmission>,
+    @InjectRepository(Entry)
+    private readonly entryRepo: Repository<Entry>,
+    @InjectModel(Data.name)
+    private readonly dataModel: Model<Data>,
   ) {}
 
   @Cron('10 0 1 * *', { timeZone: 'Asia/Jakarta' })
@@ -35,7 +35,7 @@ export class AutoFillSubmission {
           continue;
         }
 
-        const answers: SurveySubmission = {
+        const answers: Data = {
           surveyId: entry.surveyId,
           employeeId: entry.employeeId,
           answers: [],
@@ -45,7 +45,7 @@ export class AutoFillSubmission {
         let total = 0;
 
         for (const question of questions) {
-          const item: SurveyAnswer = {
+          const item: DataAnswer = {
             questionId: question.id,
             type: question.type,
             value: null,
@@ -78,7 +78,7 @@ export class AutoFillSubmission {
 
         answers.totalPoint = total;
 
-        const doc = await this.submissionModel.create(answers);
+        const doc = await this.dataModel.create(answers);
 
         entry.nosql = doc.id;
         await this.entryRepo.save(entry);
@@ -90,7 +90,7 @@ export class AutoFillSubmission {
 
   private async getAllEmptyPreviousMonth(
     previousMonth: string,
-  ): Promise<SurveySubmissionEntry[]> {
+  ): Promise<Entry[]> {
     return await this.entryRepo.find({
       where: {
         periodMonth: previousMonth,

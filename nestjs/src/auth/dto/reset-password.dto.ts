@@ -1,8 +1,6 @@
 import {
-  IsEmail,
   IsNotEmpty,
   IsString,
-  Length,
   Matches,
   MaxLength,
   MinLength,
@@ -20,14 +18,4 @@ export class ResetPasswordDto {
     message: 'must contain at least one special character',
   })
   password: string;
-}
-
-export class ResetPasswordParams {
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  @Length(20, 200)
-  token: string;
 }

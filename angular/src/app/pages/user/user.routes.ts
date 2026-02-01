@@ -1,19 +1,19 @@
 import { Routes } from '@angular/router';
-import { ProfileComponent } from './profile/profile';
+import { ProfileComponent } from './profile/profile.component';
 import { AuthGuard } from '../../guard/auth.guard';
-import { EmployeesComponent } from './employees/employees';
+import { EntryComponent } from './entry/entry.component';
 import { onlyClient } from '../../guard/roles';
 
 export const USER_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./user').then((m) => m.UserComponent),
+    loadComponent: () => import('./user.component').then((m) => m.UserComponent),
     canMatch: onlyClient,
     children: [
       {
         path: 'submission/:id',
         loadComponent: () =>
-          import('./employees/submission/survey-live').then((m) => m.SurveyLivePageComponent),
+          import('./entry/submission/submission.component').then((m) => m.SubmissionComponent),
         canActivate: [AuthGuard],
       },
       {
@@ -23,7 +23,7 @@ export const USER_ROUTES: Routes = [
       },
       {
         path: 'employees',
-        component: EmployeesComponent,
+        component: EntryComponent,
         canActivate: [AuthGuard],
       },
 

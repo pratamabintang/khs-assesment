@@ -1,4 +1,3 @@
-import { SurveySubmissionEntry } from 'src/survey/survey-submission/survey-submission.entity';
 import { User } from '../users/user.entity';
 import {
   Entity,
@@ -12,6 +11,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
+import { Entry } from 'src/survey/entry/entry.entity';
 
 @Exclude()
 @Entity('employees')
@@ -47,16 +47,12 @@ export class Employee {
   user?: User | null;
 
   @Exclude()
-  @OneToMany(
-    () => SurveySubmissionEntry,
-    (entry: SurveySubmissionEntry) => entry.employee,
-    {
-      nullable: true,
-      cascade: true,
-      eager: false,
-    },
-  )
-  entry?: SurveySubmissionEntry[];
+  @OneToMany(() => Entry, (entry: Entry) => entry.employee, {
+    nullable: true,
+    cascade: true,
+    eager: false,
+  })
+  entry?: Entry[];
 
   @Exclude()
   @CreateDateColumn()

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtPayload } from 'src/auth/jwt-payload.type';
 import { EmployeesService } from 'src/employee/employee.service';
-import { SurveySubmissionService } from 'src/survey/schema/survey-submission.service';
 import { SurveyType } from 'src/survey/survey.type';
 import { UsersService } from 'src/users/users.service';
 import { BulkDownloadDto } from './dto/bulk-download.dto';
+import { DataService } from 'src/survey/data/data.service';
 
 type SubmissionQuestionTextarea = {
   questionId: string;
@@ -45,23 +45,16 @@ type AnswerValue = string | number | null;
 @Injectable()
 export class PenilaianService {
   constructor(
-    private readonly surveySubmissionService: SurveySubmissionService,
+    private readonly dataService: DataService,
     private readonly employeeService: EmployeesService,
     private readonly usersService: UsersService,
   ) {}
 
-  async getData(
-    user: JwtPayload,
-    submissionId: string,
-  ): Promise<SubmissionData> {
-    const { survey, submission } =
-      await this.surveySubmissionService.findOneSubmission(user, submissionId);
+  async getData(user: JwtPayload, dataId: string): Promise<SubmissionData> {
+    const { survey, data } = await this.dataService.findOneData(user, dataId);
 
     const answerMap = new Map<string, AnswerValue>(
-      (submission.answers ?? []).map((a) => [
-        a.questionId,
-        a.value as AnswerValue,
-      ]),
+      (data.answers ?? []).map((a) => [a.questionId, a.value as AnswerValue]),
     );
 
     let idxCounter = 0;
@@ -120,10 +113,7 @@ export class PenilaianService {
       },
     );
 
-    const employee = await this.employeeService.findOne(
-      user,
-      submission.employeeId,
-    );
+    const employee = await this.employeeService.findOne(user, data.employeeId);
 
     const companyUser = await this.usersService.findOne(employee.userId ?? '');
 
@@ -131,7 +121,7 @@ export class PenilaianService {
       nama: employee.fullName,
       posisi: employee.position ?? '-',
       perusahaan: companyUser?.name,
-      totalPoin: submission.totalPoint,
+      totalPoin: data.totalPoint,
       questions,
     };
   }
@@ -140,6 +130,6 @@ export class PenilaianService {
     user: JwtPayload,
     dto: BulkDownloadDto,
   ): Promise<SubmissionData[]> {
-    return Promise.all(dto.submissionIds.map((id) => this.getData(user, id)));
+    return Promise.all(dto.dataIds.map((id) => this.getData(user, id)));
   }
 }

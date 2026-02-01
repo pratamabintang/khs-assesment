@@ -1,28 +1,54 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { UserExposeDto } from './dto/user-expose.dto';
 import { PatchUserPayload } from './dto/user-patch.dto';
 import { AuthService } from '../auth/auth.service';
-import { Router } from '@angular/router';
+import { ErrorService } from '../../shared/error.service';
+import { catchError, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private http = inject(HttpClient);
-  private baseUrl = 'https://karyahusadasejahtera.web.id/api/auth';
+  private baseUrl = 'https://localhost:3000/api/auth';
+  private errorService = inject(ErrorService);
 
-  me() {
-    return this.http.get<UserExposeDto>(`${this.baseUrl}/profile`);
+  profile() {
+    this.errorService.clearError();
+    return this.http
+      .get<UserExposeDto>(`${this.baseUrl}/profile`)
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
-  patchMe(payload: PatchUserPayload) {
-    return this.http.patch<UserExposeDto>(`${this.baseUrl}/update`, payload);
+  patch(payload: PatchUserPayload) {
+    this.errorService.clearError();
+    return this.http
+      .patch<UserExposeDto>(`${this.baseUrl}/update`, payload)
+      .pipe(catchError((err) => this.handleError(err)));
   }
 
   logout() {
     this.authService.logout();
+  }
+
+  private handleError(err: HttpErrorResponse) {
+    const rawMsg = err.error?.message;
+
+    let messages: string[] = [];
+
+    if (Array.isArray(rawMsg)) {
+      messages = rawMsg.filter((x) => typeof x === 'string' && x.trim().length > 0);
+    } else if (typeof rawMsg === 'string' && rawMsg.trim()) {
+      messages = [rawMsg];
+    } else if (typeof err.message === 'string' && err.message.trim()) {
+      messages = [err.message];
+    } else {
+      messages = ['Terjadi kesalahan. Silakan coba lagi.'];
+    }
+
+    this.errorService.showError(messages);
+    return throwError(() => messages);
   }
 }

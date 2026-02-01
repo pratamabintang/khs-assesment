@@ -1,0 +1,35 @@
+<app-select
+  [formControl]="provinceCtrl()"
+  label="Provinsi"
+  [placeholder]="provinceName()"
+  [options]="provinces()"
+  [invalid]="isInvalid(provinceCtrl())"
+  errorText="Provinsi wajib dipilih."
+></app-select>
+
+<app-select
+  [formControl]="regencyCtrl()"
+  label="Kota / Kabupaten"
+  [placeholder]="regencyName()"
+  [options]="regencies()"
+  [invalid]="isInvalid(regencyCtrl())"
+  errorText="Kota/Kabupaten wajib dipilih."
+></app-select>
+
+<app-select
+  [formControl]="districtCtrl()"
+  label="Kecamatan"
+  [placeholder]="districtName()"
+  [options]="districts()"
+  [invalid]="isInvalid(districtCtrl())"
+  errorText="Kecamatan wajib dipilih."
+></app-select>
+
+<app-select
+  [formControl]="villageCtrl()"
+  label="Kelurahan / Desa"
+  [placeholder]="villageName()"
+  [options]="villages()"
+  [invalid]="isInvalid(villageCtrl())"
+  errorText="Kelurahan/Desa wajib dipilih."
+></app-select>

@@ -75,8 +75,8 @@ export function RoleGuard(allowed: RoleEnum[]): CanMatchFn {
     }
 
     return auth.refresh().pipe(
-      map((newToken) => {
-        const role = extractRoleFromToken(newToken);
+      map((res) => {
+        const role = extractRoleFromToken(res.accessToken);
 
         if (role) authState.setRole(role);
 

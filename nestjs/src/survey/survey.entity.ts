@@ -8,8 +8,8 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { SurveyQuestion } from './survey-question.entity';
-import { SurveySubmissionEntry } from './survey-submission/survey-submission.entity';
 import { Exclude, Expose } from 'class-transformer';
+import { Entry } from './entry/entry.entity';
 
 @Exclude()
 @Entity()
@@ -38,16 +38,12 @@ export class Survey {
   questions?: SurveyQuestion[];
 
   @Exclude()
-  @OneToMany(
-    () => SurveySubmissionEntry,
-    (entry: SurveySubmissionEntry) => entry.survey,
-    {
-      nullable: true,
-      cascade: true,
-      eager: false,
-    },
-  )
-  entry?: SurveySubmissionEntry[];
+  @OneToMany(() => Entry, (entry: Entry) => entry.survey, {
+    nullable: true,
+    cascade: true,
+    eager: false,
+  })
+  entry?: Entry[];
 
   @Expose()
   @CreateDateColumn()

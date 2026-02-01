@@ -6,8 +6,8 @@ export type AssignMode = 'client' | 'employee' | 'all';
 export type AssignSurveyPayload = {
   surveyId: string;
   mode: AssignMode;
-  idClient?: string;
-  idEmployee?: string;
+  userId?: string;
+  employeeId?: string;
 };
 
 @Component({
@@ -62,7 +62,6 @@ export type AssignSurveyPayload = {
             </div>
 
             <div class="mt-6 space-y-4">
-              <!-- Mode selector -->
               <div class="rounded-2xl border border-slate-200 bg-white p-4">
                 <div class="text-xs font-semibold text-slate-700">Target</div>
                 <div class="mt-3 grid gap-2 sm:grid-cols-3">
@@ -117,7 +116,6 @@ export type AssignSurveyPayload = {
                 </div>
               </div>
 
-              <!-- Inputs -->
               @if (mode() === 'client') {
                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <label class="text-[11px] font-semibold text-slate-600">ID Client</label>
@@ -160,7 +158,6 @@ export type AssignSurveyPayload = {
               }
             </div>
 
-            <!-- Actions -->
             <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -205,7 +202,7 @@ export class AssignSurveyModalComponent {
 
     if (this.mode() === 'client') return this.idClient().trim().length > 0;
     if (this.mode() === 'employee') return this.idEmployee().trim().length > 0;
-    return true; // all
+    return true;
   }
 
   submit(): void {
@@ -218,8 +215,8 @@ export class AssignSurveyModalComponent {
     this.confirm.emit({
       surveyId: this.surveyId,
       mode,
-      idClient: mode === 'client' ? idClient || undefined : undefined,
-      idEmployee: mode === 'employee' ? idEmployee || undefined : undefined,
+      userId: mode === 'client' ? idClient || undefined : undefined,
+      employeeId: mode === 'employee' ? idEmployee || undefined : undefined,
     });
   }
 }

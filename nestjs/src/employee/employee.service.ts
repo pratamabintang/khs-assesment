@@ -7,8 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './employee.entity';
-import { CreateEmployeeDto } from '../dto/create-employee.dto';
-import { UpdateEmployeeDto } from '../dto/update-employee.dto';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { JwtPayload } from 'src/auth/jwt-payload.type';
 import { RoleEnum } from 'src/users/role.enum';
 import { UpdateResult } from 'typeorm/browser';
@@ -20,13 +20,13 @@ export class EmployeesService {
     private readonly employeeRepository: Repository<Employee>,
   ) {}
 
-  async create(dto: CreateEmployeeDto): Promise<Employee> {
+  public async create(dto: CreateEmployeeDto): Promise<Employee> {
     const employee = this.employeeRepository.create(dto);
 
     return this.employeeRepository.save(employee);
   }
 
-  async findAll(user: JwtPayload): Promise<Employee[]> {
+  public async findAll(user: JwtPayload): Promise<Employee[]> {
     if (user.role === RoleEnum.ADMIN) {
       return this.employeeRepository.find();
     } else {
@@ -38,7 +38,7 @@ export class EmployeesService {
     }
   }
 
-  async findAllClientEmp(
+  public async findAllClientEmp(
     user: JwtPayload,
     clientId: string,
   ): Promise<Employee[]> {
@@ -51,16 +51,17 @@ export class EmployeesService {
     });
   }
 
-  async findOne(user: JwtPayload, id: string): Promise<Employee> {
-    if (!user?.role) {
-      throw new UnauthorizedException();
-    }
+  public async findOne(
+    user: JwtPayload,
+    employeeId: string,
+  ): Promise<Employee> {
+    if (!user?.role) throw new UnauthorizedException();
 
     const where =
       user.role === RoleEnum.ADMIN
-        ? { id }
+        ? { id: employeeId }
         : {
-            id,
+            id: employeeId,
             user: { id: user.sub },
           };
 
@@ -68,51 +69,42 @@ export class EmployeesService {
       where,
     });
 
-    if (!employee) {
-      throw new NotFoundException('Employee not found');
-    }
+    if (!employee) throw new NotFoundException('Employee not found');
 
     return employee;
   }
 
-  async update(
+  public async update(
     user: JwtPayload,
-    id: string,
+    employeeId: string,
     dto: UpdateEmployeeDto,
   ): Promise<Employee> {
-    const employee = await this.findOne(user, id);
+    const employee = await this.findOne(user, employeeId);
     Object.assign(employee, dto);
     return this.employeeRepository.save(employee);
   }
 
-  async remove(user: JwtPayload, id: string): Promise<void> {
-    const employee = await this.findOne(user, id);
-    await this.update(user, id, {
+  public async remove(user: JwtPayload, employeeId: string): Promise<void> {
+    const employee = await this.findOne(user, employeeId);
+    await this.update(user, employeeId, {
       ...employee,
       userId: null,
       position: null,
     });
 
-    await this.employeeRepository.softDelete(id);
+    await this.employeeRepository.softDelete(employeeId);
   }
 
-  async setActive(
-    user: JwtPayload,
-    id: string,
-    isActive: boolean,
-  ): Promise<Employee> {
-    const employee = await this.findOne(user, id);
-    employee.isActive = !isActive;
-    return this.employeeRepository.save(employee);
-  }
-
-  async assignJob(employeeId: string, userId: string): Promise<UpdateResult> {
+  public async assignJob(
+    employeeId: string,
+    userId: string,
+  ): Promise<UpdateResult> {
     return await this.employeeRepository.update(employeeId, {
       userId,
     });
   }
 
-  async unAssignJob(employeeId: string): Promise<UpdateResult> {
+  public async unAssignJob(employeeId: string): Promise<UpdateResult> {
     return await this.employeeRepository.update(employeeId, {
       userId: null,
     });
