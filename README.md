@@ -56,36 +56,14 @@ npm run build
 cd ..
 ```
 
----
-
-## Verification & Testing
-
-### Health Checks
-
-```bash
-# Check all containers
-docker-compose -f docker-compose.prod.yaml ps
-
-# Check backend health
-curl http://localhost:3000/health
-
-# Check nginx
-curl http://localhost -H "Host: yourdomain.com"
-
-# Check HTTPS
-curl -k https://yourdomain.com/
-```
-
 ### Database Verification
 
 ```bash
 # PostgreSQL
-docker-compose -f docker-compose.prod.yaml exec postgres \
-  psql -U admin -d KHS -c "SELECT * FROM information_schema.tables;"
+docker-compose exec postgres psql -U admin -d KHS -c "SELECT * FROM information_schema.tables;"
 
 # MongoDB
-docker-compose -f docker-compose.prod.yaml exec mongo \
-  mongosh -u admin -p your_password admin --eval "db.adminCommand('ping')"
+docker-compose exec mongo mongosh -u admin -p your_password admin --eval "db.adminCommand('ping')"
 ```
 
 ---
@@ -96,31 +74,27 @@ docker-compose -f docker-compose.prod.yaml exec mongo \
 
 ```bash
 # All containers
-docker-compose -f docker-compose.prod.yaml logs -f
+docker-compose logs -f
 
 # Specific container
-docker-compose -f docker-compose.prod.yaml logs -f backend
-docker-compose -f docker-compose.prod.yaml logs -f nginx
+docker-compose logs -f backend
+docker-compose logs -f nginx
 ```
 
 ### Database Backup
 
 ```bash
 # PostgreSQL Backup
-docker-compose -f docker-compose.prod.yaml exec postgres \
-  pg_dump -U admin KHS > backup_$(date +%Y%m%d).sql
+docker-compose exec postgres pg_dump -U admin KHS > backup_$(date +%Y%m%d).sql
 
 # PostgreSQL Restore
-docker-compose -f docker-compose.prod.yaml exec -T postgres \
-  psql -U admin KHS < backup_20260128.sql
+docker-compose exec -T postgres psql -U admin KHS < backup_20260128.sql
 
 # MongoDB Backup
-docker-compose -f docker-compose.prod.yaml exec mongo \
-  mongodump --username admin --password your_password --authenticationDatabase admin --out /backup
+docker-compose exec mongo mongodump --username admin --password your_password --authenticationDatabase admin --out /backup
 
 # MongoDB Restore
-docker-compose -f docker-compose.prod.yaml exec mongo \
-  mongorestore --username admin --password your_password --authenticationDatabase admin /backup
+docker-compose exec mongo mongorestore --username admin --password your_password --authenticationDatabase admin /backup
 ```
 
 ## Support & Documentation
