@@ -8,7 +8,7 @@ export class ForgetPassword {
   @PrimaryColumn('uuid')
   userId: string;
 
-  @Column({ unique: true })
+  @Column()
   tokenHash: string;
 
   @Column({ type: 'timestamptz' })

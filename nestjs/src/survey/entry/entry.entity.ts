@@ -1,27 +1,21 @@
 import { Employee } from 'src/employee/employee.entity';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  Index,
   JoinColumn,
   BeforeInsert,
   BeforeUpdate,
+  PrimaryColumn,
 } from 'typeorm';
 import { Survey } from '../survey.entity';
 import { User } from 'src/users/user.entity';
 import { Exclude, Expose } from 'class-transformer';
 
-@Entity('survey_submissions')
-@Index(['employeeId', 'surveyId', 'periodMonth', 'userId'], { unique: true })
+@Entity('entry')
 export class Entry {
   @Expose()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Expose()
-  @Column({ type: 'uuid' })
+  @PrimaryColumn({ type: 'uuid' })
   employeeId: string;
 
   @Exclude()
@@ -33,7 +27,7 @@ export class Entry {
   employee: Employee;
 
   @Expose()
-  @Column({ type: 'uuid' })
+  @PrimaryColumn({ type: 'uuid' })
   surveyId: string;
 
   @Exclude()
@@ -45,7 +39,7 @@ export class Entry {
   survey: Survey;
 
   @Expose()
-  @Column({ type: 'uuid' })
+  @PrimaryColumn({ type: 'uuid' })
   userId: string;
 
   @Exclude()
@@ -57,11 +51,11 @@ export class Entry {
   user: User;
 
   @Expose()
-  @Column({ type: 'date' })
+  @PrimaryColumn({ type: 'date' })
   periodMonth: string;
 
   @Expose()
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   nosql?: string | null;
 
   @BeforeInsert()

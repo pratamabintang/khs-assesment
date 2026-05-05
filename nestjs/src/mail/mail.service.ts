@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer, { Transporter } from 'nodemailer';
 import { getMailConfig } from '../config/mail.config';
@@ -41,9 +36,7 @@ export class MailService implements OnModuleInit {
       this.logger.log(`Reset password email sent successfully to: ${to}`);
     } catch (err) {
       this.logger.error(`Failed to send reset password email: ${err}`);
-      throw new InternalServerErrorException(
-        'Gagal mengirim email reset password. Silakan coba lagi.',
-      );
+      return;
     }
   }
 }

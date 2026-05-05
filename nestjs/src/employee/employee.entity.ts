@@ -21,11 +21,11 @@ export class Employee {
   id: string;
 
   @Expose()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   fullName: string;
 
   @Expose()
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   position?: string | null;
 
   @Expose()

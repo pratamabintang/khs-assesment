@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,20 +7,20 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { PasswordService } from '../users/password/password.service';
+import { HashService } from '../users/hash/hash.service';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { JwtPayload } from './jwt-payload.type';
 import { createHash, randomBytes } from 'crypto';
 import { MailService } from '../mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ForgetPassword } from './forget-password/forget-password.entity';
 import { Repository } from 'typeorm';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import type { StringValue } from 'ms';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { ResetPasswordQuery } from './query/reset-password.query';
+import { ForgetPassword } from 'src/users/forget-password/forget-password.entity';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +29,7 @@ export class AuthService {
     private readonly forgetPasswordRepository: Repository<ForgetPassword>,
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly passwordService: PasswordService,
+    private readonly hashService: HashService,
     private readonly mailService: MailService,
   ) {}
 
@@ -49,7 +48,7 @@ export class AuthService {
 
     if (
       !user ||
-      !(await this.passwordService.verify(data.password, user.password))
+      !(await this.hashService.verify(data.password, user.password))
     ) {
       throw new UnauthorizedException('invalid credentials');
     }
@@ -76,7 +75,7 @@ export class AuthService {
     const storedHash = await this.getRefreshTokenHash(payload.sub);
     if (!storedHash) throw new UnauthorizedException('No refresh token stored');
 
-    const match = await this.passwordService.verify(refreshToken, storedHash);
+    const match = await this.hashService.verify(refreshToken, storedHash);
     if (!match) throw new UnauthorizedException('Refresh token mismatch');
 
     const newPayload: JwtPayload = {
@@ -108,12 +107,10 @@ export class AuthService {
     const user = await this.userService.findOne(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    if (
-      !(await this.passwordService.verify(dto.currentPassword, user.password))
-    )
+    if (!(await this.hashService.verify(dto.currentPassword, user.password)))
       throw new BadRequestException('something wrong');
 
-    const newPassword = await this.passwordService.hash(dto.newPassword);
+    const newPassword = await this.hashService.hash(dto.newPassword);
 
     await this.userService.updatePassword(newPassword, user);
     await this.userService.removeRefreshTokenHash(userId);
@@ -121,16 +118,14 @@ export class AuthService {
 
   public async forgotPassword(email: string): Promise<void> {
     const user = await this.userService.findOneByEmail(email);
-    if (!user) throw new NotFoundException('Email tidak terdaftar');
+    if (!user) return;
 
     const existing = await this.forgetPasswordRepository.findOne({
       where: { userId: user.id },
     });
 
     if (existing && existing.expiresAt.getTime() > Date.now()) {
-      throw new ConflictException(
-        'Link reset password masih aktif. Silakan cek email atau coba lagi setelah token kedaluwarsa.',
-      );
+      return;
     }
 
     if (existing && existing.expiresAt.getTime() <= Date.now()) {
@@ -182,7 +177,7 @@ export class AuthService {
       throw new UnauthorizedException('Token reset tidak valid');
     }
 
-    const hashedPassword = await this.passwordService.hash(dto.password);
+    const hashedPassword = await this.hashService.hash(dto.password);
     await this.userService.updatePassword(hashedPassword, user);
 
     await this.forgetPasswordRepository.delete({ userId: user.id });

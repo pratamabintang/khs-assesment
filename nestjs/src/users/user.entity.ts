@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 import { RoleEnum } from './role.enum';
 import { Exclude, Expose } from 'class-transformer';
-import { ForgetPassword } from '../auth/forget-password/forget-password.entity';
 import { Employee } from '../employee/employee.entity';
 import { Entry } from 'src/survey/entry/entry.entity';
+import { ForgetPassword } from './forget-password/forget-password.entity';
 
 @Entity()
 @Exclude()
@@ -22,43 +22,43 @@ export class User {
   id: string;
 
   @Expose()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   name: string;
 
   @Expose()
-  @Column({ unique: true })
+  @Column({ type: 'varchar', length: 254, unique: true })
   email: string;
 
   @Expose()
-  @Column({ unique: true })
+  @Column({ type: 'varchar', length: 16, unique: true })
   phoneNumber: string;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'char', length: 60 })
   password: string;
 
   @Exclude()
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   refreshToken: string | null;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   province: string;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   regency: string;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   district: string;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   village: string;
 
   @Exclude()
-  @Column()
+  @Column({ type: 'varchar', length: 64 })
   fullAddress: string;
 
   @Exclude()

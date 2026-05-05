@@ -13,6 +13,7 @@ import { JwtPayload } from 'src/auth/jwt-payload.type';
 import { UpdateAnswerByIdDto } from './dto/update-answer-by-id.dto';
 import { RoleEnum } from 'src/users/role.enum';
 import { AssignSurvey } from './dto/assign-survey.dto';
+import { EntryCompositeId } from './entryId.types';
 
 @Injectable()
 export class EntryService {
@@ -88,14 +89,13 @@ export class EntryService {
 
     const normalized = this.normalizeToMonthStart(this.getCurrentMonth());
 
-    const exists = await this.entryRepository.findOne({
+    const exists = await this.entryRepository.exists({
       where: {
         userId: data.userId,
         employeeId: data.employeeId,
         surveyId: data.surveyId,
         periodMonth: normalized,
       },
-      select: { id: true },
     });
 
     if (exists) {
@@ -115,14 +115,22 @@ export class EntryService {
     await this.entryRepository.save(entity);
   }
 
-  public async findOne(entryId: string): Promise<Entry | null> {
+  public async findOne(entryId: EntryCompositeId): Promise<Entry | null> {
     return await this.entryRepository.findOneBy({
-      id: entryId,
+      employeeId: entryId.employeeId,
+      userId: entryId.userId,
+      surveyId: entryId.surveyId,
+      periodMonth: entryId.periodMonth,
     });
   }
 
-  public async hardDelete(entryId: string): Promise<void> {
-    await this.entryRepository.delete(entryId);
+  public async hardDelete(entryCompositeId: EntryCompositeId): Promise<void> {
+    await this.entryRepository.delete({
+      employeeId: entryCompositeId.employeeId,
+      userId: entryCompositeId.userId,
+      surveyId: entryCompositeId.surveyId,
+      periodMonth: entryCompositeId.periodMonth,
+    });
   }
 
   public async getAll(user: JwtPayload, month: string): Promise<Entry[]> {
@@ -188,10 +196,7 @@ export class EntryService {
     user: JwtPayload,
     dto: UpdateAnswerByIdDto,
   ): Promise<Entry> {
-    const entry = await this.entryRepository.findOne({
-      where: { id: dto.entryId },
-      select: { id: true, userId: true, nosql: true },
-    });
+    const entry = await this.findOne(dto.entryId);
 
     if (!entry) throw new NotFoundException('Submission entry not found');
 

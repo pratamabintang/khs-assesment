@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { EntryCompositeIdDto } from 'src/survey/entry/dto/update-answer-by-id.dto';
+import type { EntryCompositeId } from 'src/survey/entry/entryId.types';
 
-export class EntryIdParam {
+export class EntryCompositeIdParam {
   @IsNotEmpty()
-  @IsUUID()
-  entryId: string;
+  @ValidateNested()
+  @Type(() => EntryCompositeIdDto)
+  entryCompositeId: EntryCompositeId;
 }

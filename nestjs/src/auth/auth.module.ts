@@ -9,8 +9,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from '../guard/auth.guard';
 import { RoleGuard } from '../guard/role.guard';
 import { MailModule } from '../mail/mail.module';
-import { ForgetPassword } from './forget-password/forget-password.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ForgetPassword } from 'src/users/forget-password/forget-password.entity';
 
 @Module({
   imports: [

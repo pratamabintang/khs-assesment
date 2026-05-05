@@ -76,7 +76,7 @@ export class DataService {
     });
 
     await this.entryService.updateAnswerById(user, {
-      entryId: data.entryId,
+      entryId: data.entryCompositeId,
       noSql: doc.id,
     });
 
@@ -129,8 +129,8 @@ export class DataService {
 
     const survey: Survey = await this.surveyService.findOne(doc.surveyId);
 
-    // if (user.role === RoleEnum.USER)
-    //   await this.employeesService.findOne(user, doc.employeeId);
+    if (user.role === RoleEnum.USER)
+      await this.employeesService.findOne(user, doc.employeeId);
 
     return { survey, data: doc.toObject() };
   }
@@ -164,11 +164,16 @@ export class DataService {
     return updated.toObject();
   }
 
-  public async remove(entryId: string): Promise<void> {
-    const entry = await this.entryService.findOne(entryId);
+  public async remove(entryCompositeId: {
+    employeeId: string;
+    surveyId: string;
+    userId: string;
+    periodMonth: string;
+  }): Promise<void> {
+    const entry = await this.entryService.findOne(entryCompositeId);
     if (!entry) throw new NotFoundException('submision entry not found');
     const noSqlId: string = entry.nosql ?? '';
-    await this.entryService.hardDelete(entry.id);
+    await this.entryService.hardDelete(entryCompositeId);
 
     if (noSqlId !== '') {
       const res = await this.dataModel.findByIdAndDelete(noSqlId);

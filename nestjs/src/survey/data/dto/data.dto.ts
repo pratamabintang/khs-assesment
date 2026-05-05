@@ -8,12 +8,14 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DataAnswerDto } from './data-answer.dto';
+import { EntryCompositeIdDto } from 'src/survey/entry/dto/update-answer-by-id.dto';
+import type { EntryCompositeId } from 'src/survey/entry/entryId.types';
 
 export class DataDto {
-  @IsString()
   @IsNotEmpty()
-  @IsUUID()
-  entryId!: string;
+  @ValidateNested()
+  @Type(() => EntryCompositeIdDto)
+  entryCompositeId!: EntryCompositeId;
 
   @IsString()
   @IsNotEmpty()

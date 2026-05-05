@@ -21,7 +21,7 @@ import { FindAllQuery } from './query/find-all.query';
 import { DataIdParam } from './param/data-id.param';
 import { DataResponse } from './response/data.response';
 import { SubmissionResponse } from './response/submission.response';
-import { EntryIdParam } from './param/entry-id.param';
+import { EntryCompositeIdParam } from './param/entry-id.param';
 
 @Controller('submission')
 export class DataController {
@@ -73,7 +73,7 @@ export class DataController {
   @Delete(':entryId')
   @Role(RoleEnum.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteData(@Param() param: EntryIdParam): Promise<void> {
-    return this.dataService.remove(param.entryId);
+  async deleteData(@Param() param: EntryCompositeIdParam): Promise<void> {
+    return this.dataService.remove(param.entryCompositeId);
   }
 }

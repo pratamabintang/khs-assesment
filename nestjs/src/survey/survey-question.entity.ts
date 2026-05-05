@@ -3,8 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
 import { SurveyType } from './survey.type';
@@ -13,7 +11,7 @@ import { Survey } from './survey.entity';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-@Entity()
+@Entity('questions')
 export class SurveyQuestion {
   @Expose()
   @PrimaryGeneratedColumn('uuid')
@@ -24,11 +22,11 @@ export class SurveyQuestion {
   required: boolean;
 
   @Expose()
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 120 })
   title: string;
 
   @Expose()
-  @Column({ type: 'text' })
+  @Column({ type: 'varchar', length: 500 })
   description: string;
 
   @Expose()
@@ -58,12 +56,4 @@ export class SurveyQuestion {
     eager: false,
   })
   details?: SurveyQuestionDetail[];
-
-  @Exclude()
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @Exclude()
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

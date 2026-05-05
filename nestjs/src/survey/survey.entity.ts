@@ -12,18 +12,18 @@ import { Exclude, Expose } from 'class-transformer';
 import { Entry } from './entry/entry.entity';
 
 @Exclude()
-@Entity()
+@Entity('surveys')
 export class Survey {
   @Expose()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Expose()
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 120 })
   title: string;
 
   @Expose()
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 300 })
   description?: string;
 
   @Expose()

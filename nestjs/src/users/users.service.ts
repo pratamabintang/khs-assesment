@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Not, Repository } from 'typeorm';
-import { PasswordService } from './password/password.service';
+import { HashService } from './hash/hash.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleEnum } from './role.enum';
 import { EmployeesService } from 'src/employee/employee.service';
@@ -19,7 +19,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly passwordService: PasswordService,
+    private readonly hashService: HashService,
     private readonly employeeService: EmployeesService,
   ) {}
 
@@ -38,9 +38,7 @@ export class UsersService {
       throw new ConflictException('phone number already exists');
     }
 
-    const hashed_password = await this.passwordService.hash(
-      createUserDto.password,
-    );
+    const hashed_password = await this.hashService.hash(createUserDto.password);
 
     const user = this.userRepository.create({
       ...createUserDto,
@@ -113,7 +111,7 @@ export class UsersService {
     refreshToken: string,
   ): Promise<void> {
     const user = await this.findOne(id);
-    const hash = await this.passwordService.hash(refreshToken);
+    const hash = await this.hashService.hash(refreshToken);
 
     if (!user) return;
 
