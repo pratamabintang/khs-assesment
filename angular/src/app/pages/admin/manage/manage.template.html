@@ -29,13 +29,11 @@
                 </svg>
               </span>
 
-              <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
-                Admin Outsourcing
-              </h1>
+              <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Admin Perusahaan</h1>
             </div>
 
             <p class="text-sm text-slate-600">
-              Kelola perusahaan klien dan karyawan yang disalurkan dalam satu halaman.
+              Kelola perusahaan klien dan pegawai yang disalurkan dalam satu halaman.
             </p>
           </div>
 
@@ -74,7 +72,7 @@
               [class.hover:bg-slate-100]="activeTab() !== 'employees'"
               (click)="setTab('employees')"
             >
-              Karyawan
+              Pegawai
               <span
                 class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
                 [class.bg-white/20]="activeTab() === 'employees'"
@@ -99,7 +97,7 @@
             <div>
               <div class="text-sm font-semibold text-slate-900">Perusahaan Klien</div>
               <div class="text-xs text-slate-600">
-                (Nama, ID) • (Email, Phone) • Bergabung sejak
+                (Nama, ID) • (Email, No. HP) • Bergabung sejak
               </div>
             </div>
 
@@ -165,7 +163,7 @@
             <thead class="border-b border-slate-200 bg-white">
               <tr class="text-xs font-semibold text-slate-600">
                 <th class="px-6 py-3">(Nama, ID)</th>
-                <th class="px-6 py-3">(Email, Phone)</th>
+                <th class="px-6 py-3">(Email, No. HP)</th>
                 <th class="px-6 py-3">Bergabung sejak</th>
                 <th class="px-6 py-3 text-right">Aksi</th>
               </tr>
@@ -349,7 +347,7 @@
         </div>
 
         <div class="border-t border-slate-200 bg-slate-50/70 px-6 py-3 text-xs text-slate-500">
-          Menghapus klien akan meng-unassign semua karyawan yang terkait (userId dikosongkan).
+          Menghapus klien akan meng-unassign semua pegawai yang terkait (userId dikosongkan).
         </div>
       </section>
     }
@@ -359,8 +357,8 @@
         <div class="border-b border-slate-200 bg-slate-50/70 px-6 py-4">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div class="text-sm font-semibold text-slate-900">Karyawan</div>
-              <div class="text-xs text-slate-600">(Nama, ID) • Posisi • Aktif • Edit • Hapus</div>
+              <div class="text-sm font-semibold text-slate-900">Pegawai</div>
+              <div class="text-xs text-slate-600">(Nama, ID) • Posisi • Aktif • Ubah • Hapus</div>
               <div class="text-xs text-slate-500">
                 Total data:
                 <span class="font-semibold text-slate-700">{{ filteredEmployees().length }}</span>
@@ -389,11 +387,11 @@
                     stroke-linecap="round"
                   />
                 </svg>
-                Tambah Karyawan
+                Tambah pegawai
               </button>
 
               <div class="w-full sm:w-[360px]">
-                <label class="sr-only">Cari karyawan</label>
+                <label class="sr-only">Cari pegawai</label>
                 <div class="relative">
                   <span
                     class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -414,7 +412,7 @@
 
                   <input
                     class="w-full rounded-2xl border border-slate-200 bg-white/80 py-2.5 pl-9 pr-10 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Cari nama karyawan..."
+                    placeholder="Cari nama pegawai..."
                     [value]="employeeSearch()"
                     (input)="employeeSearch.set(($any($event.target).value ?? '').toString())"
                   />
@@ -512,7 +510,7 @@
                         [class.bg-emerald-500]="e.isActive"
                         [class.bg-amber-500]="!e.isActive"
                       ></span>
-                      {{ e.isActive ? 'Active' : 'Inactive' }}
+                      {{ e.isActive ? 'Aktif' : 'Tidak Aktif' }}
                     </span>
                   </td>
 
@@ -537,7 +535,7 @@
                             stroke-linejoin="round"
                           />
                         </svg>
-                        Edit
+                        Ubah
                       </button>
 
                       <button
@@ -610,7 +608,7 @@
         </div>
 
         <div class="border-t border-slate-200 bg-slate-50/70 px-6 py-3 text-xs text-slate-500">
-          Status aktif hanya dikelola dari bagian Karyawan.
+          Status aktif hanya dikelola dari bagian pegawai.
         </div>
       </section>
     }

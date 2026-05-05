@@ -5,6 +5,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 import { Entry } from '../../../shared/type/survey-submission/entry.type';
 import { Survey } from '../../../shared/type/survey/survey.type';
 import { Data } from '../../../shared/type/survey-submission/data.type';
+import { environment } from '../../../../env/env';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +17,7 @@ export class EntryService {
   readonly selectedEntry = signal<Entry | null>(null);
   readonly selectedIsUpdate = signal<boolean>(false);
   readonly selectedPeriod = signal<string>('');
-
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = `${environment.apiUrl}`;
 
   setFromEntry(entry: Entry, isUpdate: boolean, period: string) {
     this.selectedEntry.set(entry ?? null);

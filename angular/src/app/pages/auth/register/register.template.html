@@ -157,7 +157,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Sandi</label>
           <input
             maxlength="32"
             type="password"
@@ -177,7 +177,7 @@
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-sm font-semibold text-slate-700">Syarat password</div>
+          <div class="text-sm font-semibold text-slate-700">Syarat sandi</div>
           @if (passwordRules(); as r) {
             <ul class="mt-2 space-y-1 text-sm">
               <li
@@ -254,11 +254,11 @@
         </div>
 
         <div class="mt-4 mb-5">
-          <label class="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Password</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Sandi</label>
           <input
             maxlength="32"
             type="password"
-            placeholder="Ulangi password"
+            placeholder="Ulangi sandi"
             formControlName="confirmPassword"
             [ngClass]="{
               'border-orange-500 focus:border-orange-500 focus:ring-orange-500/20':

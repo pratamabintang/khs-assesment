@@ -10,10 +10,11 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import { AuthStateService } from './auth-state.service';
+import { environment } from '../../../env/env';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  private apiBase = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = `${environment.apiUrl}`;
   private refreshing = false;
   private refreshedToken$ = new BehaviorSubject<string | null>(null);
 
@@ -23,7 +24,7 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const isApiCall = req.url.startsWith(this.apiBase);
+    const isApiCall = req.url.startsWith(this.baseUrl);
 
     const skipAuthHeader =
       req.url.includes('/auth/login') ||

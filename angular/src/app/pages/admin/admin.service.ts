@@ -7,6 +7,7 @@ import { User } from '../../shared/type/user.type';
 import { Employee } from '../../shared/type/employee.type';
 import { AuthService } from '../auth/auth.service';
 import { SubmissionResponse } from './response/submission.response';
+import { environment } from '../../../env/env';
 
 @Injectable({
   providedIn: 'root',
@@ -15,8 +16,7 @@ export class AdminService {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
-
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = `${environment.apiUrl}`;
 
   readonly selectedEntry = signal<Entry | null>(null);
 

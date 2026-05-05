@@ -41,10 +41,7 @@ export class ForgetPasswordComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.authService.forgetPassword({ email: this.email.value }).subscribe({
-      next: () => {},
-      error: () => {},
-    });
+    this.authService.forgetPassword({ email: this.email.value });
 
     this.submitted.set(true);
   }

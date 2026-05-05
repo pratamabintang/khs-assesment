@@ -12,6 +12,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordQuery } from './query/reset-password.query';
 import { UserResponse } from './response/user.response';
 import { AccessTokenResponse } from './response/access-token.response';
+import { environment } from '../../../env/env';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -19,8 +20,7 @@ export class AuthService {
   private errorService = inject(ErrorService);
   private authStateService = inject(AuthStateService);
   private router = inject(Router);
-
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api';
+  private readonly baseUrl = `${environment.apiUrl}`;
 
   readonly ROLE_HOME: Partial<Record<RoleEnum, string>> = {
     [RoleEnum.ADMIN]: '/admin',
@@ -95,12 +95,15 @@ export class AuthService {
       });
   }
 
-  forgetPassword(payload: ForgetPasswordDto): Observable<void> {
+  forgetPassword(payload: ForgetPasswordDto): void {
     this.errorService.clearError();
 
-    return this.http
+    this.http
       .post<void>(`${this.baseUrl}/auth/forget-password`, payload)
-      .pipe(catchError((err) => this.handleError(err)));
+      .pipe(catchError((err) => this.handleError(err)))
+      .subscribe(() => {
+        this.router.navigate(['/auth', 'login']);
+      });
   }
 
   resetPassword(body: ResetPasswordDto, query: ResetPasswordQuery): void {
@@ -109,8 +112,13 @@ export class AuthService {
     this.http
       .post(`${this.baseUrl}/auth/reset-password?email=${query.email}&token=${query.token}`, body)
       .pipe(catchError((err) => this.handleError(err)))
-      .subscribe(() => {
-        this.router.navigate(['/auth', 'login']);
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/auth', 'login']);
+        },
+        error: () => {
+          this.router.navigate(['/auth', 'forget-password']);
+        },
       });
   }
 

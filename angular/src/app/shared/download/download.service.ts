@@ -3,12 +3,13 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { ErrorService } from '../error.service';
 import { BulkDownloadDto } from './dto/bulk-download.dto';
+import { environment } from '../../../env/env';
 
 @Injectable({ providedIn: 'root' })
 export class DownloadService {
   private readonly http = inject(HttpClient);
   private readonly errorService = inject(ErrorService);
-  private readonly baseUrl = 'https://karyahusadasejahtera.web.id/api/pdf';
+  private readonly baseUrl = `${environment.apiUrl}/pdf`;
 
   downloadPdf(id: string): Observable<Blob> {
     this.errorService.clearError();

@@ -5,6 +5,7 @@ import { PatchUserPayload } from './dto/user-patch.dto';
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../../shared/error.service';
 import { catchError, throwError } from 'rxjs';
+import { environment } from '../../../env/env';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,7 @@ import { catchError, throwError } from 'rxjs';
 export class UserService {
   private readonly authService = inject(AuthService);
   private http = inject(HttpClient);
-  private baseUrl = 'https://karyahusadasejahtera.web.id/api/auth';
+  private readonly baseUrl = `${environment.apiUrl}/auth`;
   private errorService = inject(ErrorService);
 
   profile() {

@@ -209,6 +209,8 @@ export class ManageComponent {
   }
 
   deleteClient(c: User) {
+    if (!confirm(`Hapus user "${c.name}"?`)) return;
+
     this.adminService.removeClient(c.id).subscribe({
       next: () => {
         this.employees.update((old) =>
@@ -224,6 +226,8 @@ export class ManageComponent {
   }
 
   deleteEmployee(e: Employee) {
+    if (!confirm(`Hapus survey "${e.fullName}"?`)) return;
+
     this.adminService.removeEmployee(e.id).subscribe({
       next: () => this.employees.update((old) => old.filter((x) => x.id !== e.id)),
       error: (err) => console.log(err),
