@@ -237,6 +237,20 @@ export class EntryService {
     );
   }
 
+  public async findOneByNoSqlId(noSqlId: string): Promise<Entry> {
+    const entry = await this.entryRepository.findOne({
+      where: {
+        nosql: noSqlId,
+      },
+    });
+
+    if (!entry) {
+      throw new NotFoundException('Entry Not Found');
+    }
+
+    return entry;
+  }
+
   private getCurrentMonth(): string {
     const now = new Date();
     const year = now.getUTCFullYear();

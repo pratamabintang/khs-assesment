@@ -69,6 +69,8 @@ export class EmployeesService {
       where,
     });
 
+    console.log(user.sub);
+    console.log(employeeId);
     if (!employee) throw new NotFoundException('Employee not found');
 
     return employee;

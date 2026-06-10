@@ -117,8 +117,10 @@ export class SubmissionComponent {
 
     this.submitting.set(true);
 
-    payload.entryId = this.selectedEntry()!.id;
-    payload.employeeId = this.selectedEntry()!.employeeId;
+    payload.entryCompositeId.userId = this.selectedEntry()?.userId ?? '';
+    payload.entryCompositeId.employeeId = this.selectedEntry()?.employeeId ?? '';
+    payload.entryCompositeId.surveyId = this.selectedEntry()?.surveyId ?? '';
+    payload.entryCompositeId.periodMonth = this.selectedEntry()?.periodMonth ?? '';
 
     const req$ = this.selectedUpdate()
       ? this.api.updateSurvey(this.selectedEntry()?.nosql!, payload)

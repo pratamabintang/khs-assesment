@@ -1,9 +1,14 @@
 import { SurveyType } from '../../../shared/type/survey/survey-type.type';
 
-export interface DataDto {
-  entryId: string;
-  surveyId: string;
+export interface EntryCompositeId {
   employeeId: string;
+  surveyId: string;
+  userId: string;
+  periodMonth: string;
+}
+
+export interface DataDto {
+  entryCompositeId: EntryCompositeId;
   answers: DataAnswerDto[];
 }
 

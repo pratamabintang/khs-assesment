@@ -124,9 +124,12 @@ export class SurveyDynamicFormComponent implements OnChanges {
     if (this.form.invalid) return;
 
     const payload: DataDto = {
-      entryId: '',
-      surveyId: this.form.controls.surveyId.value,
-      employeeId: '',
+      entryCompositeId: {
+        employeeId: '',
+        userId: '',
+        surveyId: '',
+        periodMonth: '',
+      },
       answers: this.answers.controls.map((g) => ({
         questionId: g.controls.questionId.value,
         type: g.controls.type.value,

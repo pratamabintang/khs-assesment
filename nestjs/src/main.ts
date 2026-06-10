@@ -9,6 +9,7 @@ import {
 import * as fs from 'fs';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+// import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -49,6 +50,21 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  // const config = new DocumentBuilder()
+  //   .setTitle('API Documentation')
+  //   .setDescription('Dokumentasi API untuk aplikasi NestJS')
+  //   .setVersion('1.0')
+  //   .addBearerAuth()
+  //   .build();
+
+  // const document = SwaggerModule.createDocument(app, config);
+
+  // SwaggerModule.setup('api/docs', app, document, {
+  //   swaggerOptions: {
+  //     persistAuthorization: true,
+  //   },
+  // });
 
   const port = process.env.API_PORT || 3000;
   await app.listen(port);

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,7 +11,6 @@ import { DataDto } from './dto/data.dto';
 import { SurveyService } from '../survey.service';
 import { Survey } from '../survey.entity';
 import { SurveyQuestion } from '../survey-question.entity';
-import { Employee } from '../../employee/employee.entity';
 import { EmployeesService } from '../../employee/employee.service';
 import { UsersService } from '../../users/users.service';
 import { RoleEnum } from '../../users/role.enum';
@@ -19,6 +19,8 @@ import { UpdateDataDto } from './dto/update-data.dto';
 import { EntryService } from '../entry/entry.service';
 import { Data } from './data.schema';
 import { DataAnswer } from './data-answer.schema';
+import { EntryCompositeId } from '../entry/entryId.types';
+import { Entry } from '../entry/entry.entity';
 
 @Injectable()
 export class DataService {
@@ -32,17 +34,21 @@ export class DataService {
   ) {}
 
   public async create(user: JwtPayload, data: DataDto): Promise<Data> {
-    const survey: Survey = await this.surveyService.findOne(data.surveyId);
+    const survey: Survey = await this.surveyService.findOne(
+      data.entryCompositeId.surveyId,
+    );
     if (!survey) throw new NotFoundException('Survey Not Found');
 
     if (!(await this.usersService.findOne(user.sub)))
       throw new NotFoundException('User Not Found');
 
-    const employee: Employee = await this.employeesService.findOne(
-      user,
-      data.employeeId,
-    );
-    if (!employee) throw new NotFoundException('Employee Not Found');
+    if (
+      !(await this.employeesService.findOne(
+        user,
+        data.entryCompositeId.employeeId,
+      ))
+    )
+      throw new NotFoundException('Employee Not Found');
 
     const questions: SurveyQuestion[] = survey.questions ?? [];
 
@@ -71,7 +77,9 @@ export class DataService {
     }
 
     const doc = await this.dataModel.create({
-      ...data,
+      surveyId: data.entryCompositeId.surveyId,
+      employeeId: data.entryCompositeId.employeeId,
+      answers: data.answers,
       totalPoint: this.sum(data.answers),
     });
 
@@ -128,9 +136,10 @@ export class DataService {
     if (!doc) throw new NotFoundException('SurveySubmission Not Found');
 
     const survey: Survey = await this.surveyService.findOne(doc.surveyId);
+    const entry: Entry = await this.entryService.findOneByNoSqlId(submissionId);
 
-    if (user.role === RoleEnum.USER)
-      await this.employeesService.findOne(user, doc.employeeId);
+    if (user.role !== RoleEnum.ADMIN && user.sub !== entry.userId)
+      throw new ForbiddenException('Ilegal access');
 
     return { survey, data: doc.toObject() };
   }
@@ -164,12 +173,7 @@ export class DataService {
     return updated.toObject();
   }
 
-  public async remove(entryCompositeId: {
-    employeeId: string;
-    surveyId: string;
-    userId: string;
-    periodMonth: string;
-  }): Promise<void> {
+  public async remove(entryCompositeId: EntryCompositeId): Promise<void> {
     const entry = await this.entryService.findOne(entryCompositeId);
     if (!entry) throw new NotFoundException('submision entry not found');
     const noSqlId: string = entry.nosql ?? '';

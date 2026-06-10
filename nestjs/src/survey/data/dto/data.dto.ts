@@ -2,30 +2,18 @@ import {
   ArrayMinSize,
   IsArray,
   IsNotEmpty,
-  IsString,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DataAnswerDto } from './data-answer.dto';
-import { EntryCompositeIdDto } from 'src/survey/entry/dto/update-answer-by-id.dto';
 import type { EntryCompositeId } from 'src/survey/entry/entryId.types';
+import { EntryCompositeIdDto } from 'src/survey/entry/dto/entry-composite-id.dto';
 
 export class DataDto {
   @IsNotEmpty()
   @ValidateNested()
   @Type(() => EntryCompositeIdDto)
   entryCompositeId!: EntryCompositeId;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsUUID()
-  surveyId!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsUUID()
-  employeeId!: string;
 
   @IsArray()
   @ArrayMinSize(1, {
